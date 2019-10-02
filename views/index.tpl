@@ -67,7 +67,7 @@
                             <span>{{port[0]}}</span>
                             <div class="control-input-container">
                                 <input type="range" min="{{port[2][1]}}" max="{{port[2][2]}}" step="0.001" value="{{port[4]}}" autocomplete="off">
-                                <input type="text" inputmode="numeric"   value="{{port[4]}}" autocomplete="off" size="5">
+                                <input type="text" inputmode="decimal" value="{{port[4]}}" autocomplete="off" size="5">
                             </div>
                         </div>
                         % port_index = port_index + 1
