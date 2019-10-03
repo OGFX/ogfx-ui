@@ -10,48 +10,60 @@ body {
     background-color: #7697a0;
     padding: 0.0em;
     margin: 0.1em;
-    // border-radius: 0.5em;
-    // margin: 0.5em;
+    /* border-radius: 0.5em; */
+    /*  margin: 0.5em; */
     font-size: 1.0em;
     font-family: monospace;
 }
 
-#top-menu {
-    // padding: 0.0em;
-    // margin: 0.0em;
-    margin-bottom: 1.0em;
+a {
+    color: #4a707a
 }
 
-#top-menu > a {
-    // color: #FFFFFF;
-    // background-color: #202020;
-    // border-radius: 0.5em;
-    // padding: 0.5em;
-    // margin: 0.0em;
+#top-menu {
+    background-color: #4a707a;
+    /* padding: 0.0em; */
+    /* margin: 0.0em;*/
+    border-radius: 0.5em;
+    margin: 0.3em;
+    padding-left: 0.3em;
+    margin-bottom: 1.0em; 
+}
+
+#top-menu > div >  a {
+    color: #ffffff;
 }
 
 .rack {
-    //width: 100%;
+    /*width: 100%;*/
     background-color: #94b0b7;
     border-radius: 0.5em;
-    //padding: 1px;
-    //margin: 3px;
+    /*padding: 1px;*/
+    /*margin: 3px;*/
     margin: 0.3em;
     padding: 0.1em;
     padding-left: 0.3em;
 }
 
-#racks-navigation-list {
-    margin-top: 2.0em;
+.racks-navigation-list {
+    background-color: #4a707a;
+    border-radius: 0.5em;
+    margin: 0.3em;
+    padding-left: 0.3em;
+    margin-bottom: 1.0em; 
+}
+
+.racks-navigation-list > div > a {
+    color: #ffffff;
 }
 
 .add-rack {
     background-color: #c2c8c5;
-    // background-color: #7697a0;
+    /* background-color: #7697a0;*/
     border-radius: 0.5em;
     border-width: 1px;
     border-color: #000000;
-    // width: 100%;
+    /* width: 100%;*/
     margin: 0.3em;
     padding: 0.1em;
     padding-left: 0.3em;
@@ -63,7 +75,7 @@ body {
     border-radius: 0.5em;
     border-width: 1px;
     border-color: #000000;
-    // width: 100%;
+    /* width: 100%;*/
     margin: 0.5em;
     padding: 0.2em;
     padding-left: 0.5em;
@@ -75,26 +87,22 @@ body {
     border-radius: 0.5em;
     border-width: 1px;
     border-color: #000000;
-    // width: 100%;
+    /* width: 100%;*/
     margin: 0.5em;
     padding: 0.5em;
 }
 
 .unit-info {
-    // color: #F0F0F0;
-    // padding: 0.5em;
+    /* color: #F0F0F0;*/
+    /* padding: 0.5em;*/
     margin-top: 1.0em;
     margin-bottom: 0.5em;
 }
 
 .control-input-container {
-    // width: 100%;
+    /* width: 100%;*/
     display: flex;
     flex-direction: row;
-}
-
-a {
-    color: #4a707a
 }
 
 .add-unit > a {
@@ -103,22 +111,22 @@ a {
 
 .control-input-container > p {
     margin-top: 0.2em;
-    // padding: 0.5em;
-    // background-color: #505050;
-    // color: #ffffff;
+    /* padding: 0.5em;*/
+    /* background-color: #505050;*/
+    /* color: #ffffff;*/
 }
 .control-input-container > input[type="number"] {
-    // width: 100%;
+    /* width: 100%;*/
     flex-grow: 1;
     margin: 0.0em;
-    // color: #404040;
+    /* color: #404040;*/
 }
 .control-input-container > input[type="range"] {
-    // width: 100%;
+    /* width: 100%;*/
     flex-grow: 99;
     margin: 0.0em;
     background-color: #00000000;
-    // color: #404040;
+    /* color: #404040;*/
 }
 
 .operations {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>OGFX</title>
     <link rel="stylesheet" type="text/css" href="/static/index.css">
@@ -9,20 +9,20 @@
 
 <body>
 <div id="top-menu">
-    <span>setup:</span>
-    <p class="operations">
+    <span>setup: {{setup['name']}}</span>
+    <div class="operations">
         <a href="save">save</a> 
         <a href="saveas">(as)</a> 
         <a href="load">load</a> 
         <a href="new">new</a>
-    </p>
+    </div>
 </div>
 
 <div class="racks-navigation-list">
     <span>racks:</span>
     <div class="operations">
         % index = 0
-        % for rack in racks:
+        % for rack in setup['racks']:
             <a href="#rack-{{index}}">rack-{{index}}</a>
             % index = index + 1
         %end
@@ -34,7 +34,7 @@
         <a href="add-rackt">add rack</a>
     </div>
     % rack_index = 0
-    % for rack in racks:
+    % for rack in setup['racks']:
         <div class="rack" id="rack-{{rack_index}}">
             <div>
                 <span>{{rack_index}}._._:</span>
@@ -43,7 +43,8 @@
                     <a href="save">save</a> 
                     <a href="saveas">(as)</a> 
                     <a href="load">load</a> 
-                    <a href="new">new</a>
+                    <a href="reset">reset</a>
+                    <a href="delete">delete</a>
                 </div>
             </div>
             <div class="add-unit">
@@ -54,14 +55,18 @@
             <div class="unit">
                 <div class="unit-info">
                     <span>{{rack_index}}.{{unit_index}}._:</span>
-                    <span>{{unit[1]}}</span>
+                    <span>{{unit['name']}}</span>
                     <div class="operations">
-                        <a href="save">save</a> <a href="saveas">(as)</a> <a href="load">load</a> <a href="reset">reset</a> <a href="delete">delete</a>
+                        <a href="save">save</a> 
+                        <a href="saveas">(as)</a> 
+                        <a href="load">load</a> 
+                        <a href="reset">reset</a> 
+                        <a href="delete">delete</a>
                     </div>
                 </div>
                 <div class="port-info">
                     % port_index = 0
-                    % for port in unit[2]:
+                    % for port in unit['control_ports']:
                         <div>
                             <span>{{rack_index}}.{{unit_index}}.{{port_index}}:</span>
                             <span>{{port[0]}}</span>

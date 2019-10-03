@@ -1,4 +1,5 @@
-// created using http://danielstern.ca/range.css/?ref=css-tricks#/
+/* created using http://danielstern.ca/range.css/?ref=css-tricks#/ */
+
 input[type=range] {
   -webkit-appearance: none;
   width: 100%;
