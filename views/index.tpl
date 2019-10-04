@@ -14,7 +14,9 @@
         <a href="save">save</a> 
         <a href="saveas">(as)</a> 
         <a href="load">load</a> 
-        <a href="new">new</a>
+        <a href="reset">rst</a>
+        <a href="upload">ul</a>
+        <a href="download" download="ogfx-setup.json">dl</a>
     </div>
 </div>
 
@@ -31,7 +33,7 @@
 
 <div id="racks">
     <div class="add-rack">
-        <a href="add-rackt">add rack</a>
+        <a href="add/0">add rack</a>
     </div>
     % rack_index = 0
     % for rack in setup['racks']:
@@ -40,39 +42,55 @@
                 <span>{{rack_index}}._._:</span>
                 <span>rack-{{rack_index}}</span>
                 <div class="operations">
-                    <a href="save">save</a> 
-                    <a href="saveas">(as)</a> 
-                    <a href="load">load</a> 
-                    <a href="reset">reset</a>
-                    <a href="delete">delete</a>
+                    <a href="moveup/{{rack_index}}">▲</a> 
+                    <a href="movedown/{{rack_index}}">▼</a> 
+                    <a href="save/{{rack_index}}">save</a> 
+                    <a href="saveas/{{rack_index}}">(as)</a> 
+                    <a href="load/{{rack_index}}">load</a> 
+                    <a href="reset/{{rack_index}}">rst</a>
+                    <a href="delete/{{rack_index}}">del</a>
+                    <a href="upload/{{rack_index}}">ul</a> 
+                    <a href="download/{{rack_index}}" download="ogfx-rack.json">dl</a> 
                 </div>
             </div>
             <div class="add-unit">
-                <a href="add-unit">add unit</a>
+                <a href="add/{{rack_index}}/0">add unit</a>
             </div>
             % unit_index = 0
             % for unit in rack:
-            <div class="unit">
+            <div class="unit" id="unit-{{rack_index}}-{{unit_index}}">
                 <div class="unit-info">
                     <span>{{rack_index}}.{{unit_index}}._:</span>
                     <span>{{unit['name']}}</span>
                     <div class="operations">
-                        <a href="save">save</a> 
-                        <a href="saveas">(as)</a> 
-                        <a href="load">load</a> 
-                        <a href="reset">reset</a> 
-                        <a href="delete">delete</a>
+                        <a href="moveup/{{rack_index}}/{{unit_index}}">▲</a> 
+                        <a href="movedown/{{rack_index}}/{{unit_index}}">▼</a> 
+                        <a href="save/{{rack_index}}/{{unit_index}}">save</a> 
+                        <a href="saveas/{{rack_index}}/{{unit_index}}">(as)</a> 
+                        <a href="load/{{rack_index}}/{{unit_index}}">load</a> 
+                        <a href="reset/{{rack_index}}/{{unit_index}}">rst</a> 
+                        <a href="delete/{{rack_index}}/{{unit_index}}">del</a>
+                        <a href="upload/{{rack_index}}/{{unit_index}}">ul</a> 
+                        <a href="download/{{rack_index}}/{{unit_index}}" download="ogfx-unit.json">dl</a> 
                     </div>
+                </div>
+                <div class="connections-info">
+                    % if unit['type'] == 'special':
+                        % for connection in unit['connections']:
+                            <span>{{connection}}</span>
+                            <div><a class="operations" href="disconnect">disconnect</a></div>
+                        % end
+                    % end
                 </div>
                 <div class="port-info">
                     % port_index = 0
-                    % for port in unit['control_ports']:
-                        <div>
+                    % for port in unit['input_control_ports']:
+                        <div id="port-{{rack_index}}-{{unit_index}}-{{port_index}}">
                             <span>{{rack_index}}.{{unit_index}}.{{port_index}}:</span>
-                            <span>{{port[0]}}</span>
+                            <span>{{port['name']}}</span>
                             <div class="control-input-container">
-                                <input type="range" min="{{port[2][1]}}" max="{{port[2][2]}}" step="0.001" value="{{port[4]}}" autocomplete="off">
-                                <input type="text" inputmode="decimal" value="{{port[4]}}" autocomplete="off" size="5">
+                                <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off">
+                                <input class="input-control-port-value-text" type="text" inputmode="decimal" value="{{port['value']}}" autocomplete="off" size="5">
                             </div>
                         </div>
                         % port_index = port_index + 1
@@ -81,13 +99,13 @@
                 % unit_index = unit_index + 1
             </div>
             <div class="add-unit">
-                <a href="add-unit">add unit</a>
+                <a href="add/{{rack_index}}/{{unit_index}}">add unit</a>
             </div>
             % end
         </div>
         %rack_index = rack_index + 1
         <div class="add-rack">
-            <a href="add-rackt">add rack</a>
+            <a href="add/{{rack_index}}">add rack</a>
         </div>
     % end
 </div>
