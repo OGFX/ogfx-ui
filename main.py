@@ -2,13 +2,14 @@
 
 
 import lilv
-# import ingen
 import bottle
 import json
 import xdg
 import os
 import copy
 import io
+import subprocess
+import uuid
 
 print(os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'setups'))
 
@@ -39,6 +40,10 @@ units_map[return_uri] = {'type': 'special', 'data': { 'name': 'return', 'connect
 unit_type_lv2 = 'lv2'
 unit_type_special = 'special'
 
+
+subprocess_map = dict()
+
+
 def create_setup():
     return {'name': 'new setup', 'racks': [] }
 
@@ -48,6 +53,7 @@ setup = create_setup()
 # UNITS 
 
 def add_unit0(rack_index, unit_index, uri):
+    print('adding unit {}:{} uri {}'.format(rack_index, unit_index, uri))
     unit = units_map[uri]
     unit_type = unit['type']
     input_control_ports = []
@@ -62,14 +68,22 @@ def add_unit0(rack_index, unit_index, uri):
         for port_index in range(unit['data'].get_num_ports()):
             port = unit['data'].get_port_by_index(port_index)
             if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/ext/atom#InputPort')) or port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#ControlPort')):
+                print('port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
+                port_range = [0, -1, 1]
                 lilv_port_range = port.get_range()
-                port_range1 = tuple(map(str, lilv_port_range))
-                port_range = tuple(map(float, port_range1))
+                if lilv_port_range[0] is not None:
+                    port_range[0] = float(str(lilv_port_range[0]))
+                if lilv_port_range[1] is not None:
+                    port_range[1] = float(str(lilv_port_range[1]))
+                if lilv_port_range[2] is not None:
+                    port_range[2] = float(str(lilv_port_range[2]))
                 default_value = port_range[0]
                 control_port = { 'name': str(port.get_name()), 'symbol': str(port.get_symbol()), 'range': port_range, 'value': default_value }
                 input_control_ports.append(control_port)
 
-    setup['racks'][rack_index].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'connections': connections })
+    unit_uuid = str(uuid.uuid4())
+    subprocess_map[unit_uuid] = subprocess.Popen(['jalv', uri], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    setup['racks'][rack_index].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'connections': connections, 'uuid': unit_uuid })
 
 @bottle.route('/add/<rack_index:int>/<unit_index:int>/<uri>')
 def add_unit(rack_index, unit_index, uri):
@@ -170,6 +184,18 @@ def resetet():
 @bottle.route('/static/<filepath:path>')
 def static(filepath):
     return bottle.static_file(filepath, root='static/')
+
+add_rack0(0)
+
+add_unit0(0, 1, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+add_unit0(0, 2, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
+add_unit0(0, 3, 'http://gareus.org/oss/lv2/convoLV2#Mono')
+add_unit0(0, 4, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
+add_unit0(0, 5, 'http://drobilla.net/plugins/mda/DubDelay')
+add_unit0(0, 6, 'http://calf.sourceforge.net/plugins/Reverb')
+add_unit0(0, 7, 'http://plugin.org.uk/swh-plugins/sc4')
+add_unit0(0, 8, 'http://plugin.org.uk/swh-plugins/amp')
+add_unit0(0, 9, 'http://plugin.org.uk/swh-plugins/amp')
 
 if False:
     add_rack(0)
