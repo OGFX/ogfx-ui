@@ -10,8 +10,11 @@ import copy
 import io
 import subprocess
 import uuid
+import jack
 
 print(os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'setups'))
+
+jack_client = jack.Client('OGFX')
 
 lilv_world = lilv.World()
 lilv_world.load_all()
@@ -25,17 +28,29 @@ for p in lilv_plugins:
 special_units = dict()
 
 # Some special names:
-input_uri = 'http://ogfx.fps.io/lv2/ns/input'
-units_map[input_uri] = {'type': 'special', 'data': { 'name': 'input', 'connections': [] } }
+mono_input_uri = 'http://ogfx.fps.io/lv2/ns/mono_input'
+units_map[mono_input_uri] = {'type': 'special', 'data': { 'name': 'mono_input', 'connections': [[]] } }
 
-output_uri = 'http://ogfx.fps.io/lv2/ns/outut'
-units_map[output_uri] = {'type': 'special', 'data': { 'name': 'output', 'connections': [] } }
+mono_output_uri = 'http://ogfx.fps.io/lv2/ns/outut'
+units_map[mono_output_uri] = {'type': 'special', 'data': { 'name': 'mono_output', 'connections': [[]] } }
 
-send_uri = 'http://ogfx.fps.io/lv2/ns/send'
-units_map[send_uri] = {'type': 'special', 'data': { 'name': 'send', 'connections': [] } }
+stereo_input_uri = 'http://ogfx.fps.io/lv2/ns/stereo_input'
+units_map[stereo_input_uri] = {'type': 'special', 'data': { 'name': 'stereo_input', 'connections': [[], []] } }
 
-return_uri = 'http://ogfx.fps.io/lv2/ns/send'
-units_map[return_uri] = {'type': 'special', 'data': { 'name': 'return', 'connections': [] } }
+stereo_output_uri = 'http://ogfx.fps.io/lv2/ns/stereo_outut'
+units_map[stereo_output_uri] = {'type': 'special', 'data': { 'name': 'stereo_output', 'connections': [[], []] } }
+
+mono_send_uri = 'http://ogfx.fps.io/lv2/ns/mono_send'
+units_map[mono_send_uri] = {'type': 'special', 'data': { 'name': 'mono_send', 'connections': [[]] } }
+
+mono_return_uri = 'http://ogfx.fps.io/lv2/ns/mono_return'
+units_map[mono_return_uri] = {'type': 'special', 'data': { 'name': 'mono_return', 'connections': [[]] } }
+
+stereo_send_uri = 'http://ogfx.fps.io/lv2/ns/stereo_send'
+units_map[stereo_send_uri] = {'type': 'special', 'data': { 'name': 'stereo_send', 'connections': [[], []] } }
+
+stereo_return_uri = 'http://ogfx.fps.io/lv2/ns/stereo_return'
+units_map[stereo_return_uri] = {'type': 'special', 'data': { 'name': 'stereo_return', 'connections': [[], []] } }
 
 unit_type_lv2 = 'lv2'
 unit_type_special = 'special'
@@ -49,6 +64,21 @@ def create_setup():
 
 setup = create_setup()
 
+# WIRING
+def rewire():
+    pass
+
+@bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>', method='POST')
+def connect2(rack_index, unit_index, channel_index):
+    global setup
+    setup['racks'][rack_index][unit_index]['connections'][channel_index].insert(0,  bottle.request.forms.get('port'))
+    bottle.redirect('/#rack-{}-unit-{}'.format(rack_index, unit_index))
+
+@bottle.route('/connect/<rack_index:int>/<unit_index:int>/<channel_index:int>')
+@bottle.view('connect')
+def connect(rack_index, unit_index, channel_index):
+    return dict({'ports': jack_client.get_ports(), 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
+
 
 # UNITS 
 
@@ -61,7 +91,7 @@ def add_unit0(rack_index, unit_index, uri):
     unit_name = ''
     if unit_type == unit_type_special:
         unit_name = unit['data']['name']
-        connections = unit['data']['connections']
+        connections = copy.copy(unit['data']['connections'])
 
     if unit_type == unit_type_lv2:
         unit_name = str(unit['data'].get_name())
@@ -85,6 +115,11 @@ def add_unit0(rack_index, unit_index, uri):
     subprocess_map[unit_uuid] = subprocess.Popen(['jalv', uri], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     setup['racks'][rack_index].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'connections': connections, 'uuid': unit_uuid })
 
+    rewire()
+
+def append_unit0(rack_index, uri):
+    add_unit0(rack_index, len(setup['racks'][rack_index]), uri)
+
 @bottle.route('/add/<rack_index:int>/<unit_index:int>/<uri>')
 def add_unit(rack_index, unit_index, uri):
     add_unit0(rack_index, unit_index, uri)
@@ -98,6 +133,7 @@ def add_unit(rack_index, unit_index):
 def delete_unit0(rack_index, unit_index):
     global setup
     del setup['racks'][rack_index][unit_index]
+    rewire()
 
 @bottle.route('/delete/<rack_index:int>/<unit_index:int>')
 def delete_unit(rack_index, unit_index):
@@ -110,6 +146,7 @@ def delete_unit(rack_index, unit_index):
 def add_rack0(rack_index):
     global setup
     setup['racks'].insert(int(rack_index), [])
+    rewire()
 
 @bottle.route('/add/<rack_index>')
 def add_rack(rack_index):
@@ -187,15 +224,16 @@ def static(filepath):
 
 add_rack0(0)
 
-add_unit0(0, 1, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-add_unit0(0, 2, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
-add_unit0(0, 3, 'http://gareus.org/oss/lv2/convoLV2#Mono')
-add_unit0(0, 4, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
-add_unit0(0, 5, 'http://drobilla.net/plugins/mda/DubDelay')
-add_unit0(0, 6, 'http://calf.sourceforge.net/plugins/Reverb')
-add_unit0(0, 7, 'http://plugin.org.uk/swh-plugins/sc4')
-add_unit0(0, 8, 'http://plugin.org.uk/swh-plugins/amp')
-add_unit0(0, 9, 'http://plugin.org.uk/swh-plugins/amp')
+append_unit0(0, mono_input_uri)
+append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
+append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
+append_unit0(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
+append_unit0(0, 'http://drobilla.net/plugins/mda/DubDelay')
+append_unit0(0, 'http://calf.sourceforge.net/plugins/Reverb')
+append_unit0(0, 'http://plugin.org.uk/swh-plugins/sc4')
+append_unit0(0, 'http://plugin.org.uk/swh-plugins/amp')
+append_unit0(0, stereo_output_uri)
 
 if False:
     add_rack(0)

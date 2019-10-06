@@ -76,9 +76,14 @@
                 </div>
                 <div class="connections-info">
                     % if unit['type'] == 'special':
-                        % for connection in unit['connections']:
-                            <span>{{connection}}</span>
-                            <div><a class="operations" href="disconnect">disconnect</a></div>
+                        % channel_index = 0
+                        % for channel in unit['connections']:
+                            <span>channel-{{channel_index}}:</span>
+                            % for connection in channel:
+                                <div><span>{{connection}}</span><a class="operations" href="disconnect">disconnect</a></div>
+                            % end
+                            <div><a class="operations" href="connect/{{rack_index}}/{{unit_index}}/{{channel_index}}">connect</a></div>
+                            % channel_index = channel_index + 1
                         % end
                     % end
                 </div>
