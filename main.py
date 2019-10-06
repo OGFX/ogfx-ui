@@ -72,13 +72,21 @@ def rewire():
 def connect2(rack_index, unit_index, channel_index):
     global setup
     setup['racks'][rack_index][unit_index]['connections'][channel_index].insert(0,  bottle.request.forms.get('port'))
-    bottle.redirect('/#rack-{}-unit-{}'.format(rack_index, unit_index))
+    bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 @bottle.route('/connect/<rack_index:int>/<unit_index:int>/<channel_index:int>')
 @bottle.view('connect')
 def connect(rack_index, unit_index, channel_index):
     return dict({'ports': jack_client.get_ports(), 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
 
+def disconnect0(rack_index, unit_index, channel_index, connection_index):
+    global setup
+    del setup['racks'][rack_index][unit_index]['connections'][channel_index][connection_index]
+
+@bottle.route('/disconnect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<connection_index:int>')
+def disconnect(rack_index, unit_index, channel_index, connection_index):
+    disconnect0(rack_index, unit_index, channel_index, connection_index)
+    bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 # UNITS 
 

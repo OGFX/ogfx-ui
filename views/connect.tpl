@@ -11,9 +11,8 @@
             <span>Choose a port to connect to:</span>
             <form action="/connect2{{remaining_path}}" method="post" enctype="multipart/form-data">
                 % for port in ports:
-                    <p><input type="radio" name="port" value="{{port.name}}">{{port.name}}</p>
+                    <p><input type="submit" name="port" value="{{port.name}}">{{port.name}}</p>
                 %end
-                <input type="submit" value="submit">
             </form>
         </div>
     </body>
