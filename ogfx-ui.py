@@ -15,13 +15,17 @@ import logging
 import rtmidi
 import argparse
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
-
-logging.debug('setting up argument parsing...')
-
 arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
+arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=3)
+arguments_parser.add_argument('--setup', dest='setup', action='store', help='A file containing a setup to load at startup')
+
 
 arguments = arguments_parser.parse_args()
+
+
+log_levels_map = {1: logging.DEBUG, 2: logging.INFO, 3: logging.WARNING, 4: logging.ERROR, 5: logging.CRITICAL}
+
+logging.basicConfig(level=log_levels_map[arguments.log_level], format='%(asctime)s %(message)s')
 
 logging.info(os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'setups'))
 
