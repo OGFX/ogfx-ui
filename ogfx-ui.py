@@ -11,16 +11,27 @@ import io
 import subprocess
 import uuid
 import jack
+import logging
+import rtmidi
+import argparse
 
-print(os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'setups'))
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+
+logging.debug('setting up argument parsing...')
+
+arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
+
+arguments = arguments_parser.parse_args()
+
+logging.info(os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'setups'))
 
 
-print('-> creating jack client...')
+logging.info('-> creating jack client...')
 jack_client = jack.Client('OGFX')
 
 units_map = dict()
 
-print('-> registering special units...')
+logging.info('-> registering special units...')
 special_units = dict()
 
 # Some special names:
@@ -51,21 +62,20 @@ units_map[stereo_return_uri] = {'type': 'special', 'name': 'stereo_return', 'dir
 unit_type_lv2 = 'lv2'
 unit_type_special = 'special'
 
-print('-> creating lilv world...')
+logging.info('-> creating lilv world...')
 lilv_world = lilv.World()
-print('-> load_all...')
+logging.info('-> load_all...')
 lilv_world.load_all()
-print('-> get_all_plugins...')
+logging.info('-> get_all_plugins...')
 lilv_plugins = lilv_world.get_all_plugins()
 
-print('-> registering lv2 plugins...')
+logging.info('-> registering lv2 plugins...')
 for p in lilv_plugins:
-        # print(str(p.get_uri()))
-        print('.', end='', flush=True)
-        units_map[str(p.get_uri())] = {'type': 'lv2', 'name': str(p.get_name()), 'data': p }
-print('.')
+    # logging.info(str(p.get_uri()))
+    logging.debug(str(p.get_uri()))
+    units_map[str(p.get_uri())] = {'type': 'lv2', 'name': str(p.get_name()), 'data': p }
 
-print('-> creating subprocess map...')
+logging.info('-> creating subprocess map...')
 
 subprocess_map = dict()
 
@@ -74,16 +84,16 @@ def create_setup():
     return {'name': 'new setup', 'racks': [] }
 
 
-print('-> creating setup...')
+logging.info('-> creating setup...')
 setup = create_setup()
 
 
 # WIRING
 def rewire():
-    print('-> rewire')
+    logging.info('-> rewire')
     global setup
 
-print('-> setting up routes...')
+logging.info('-> setting up routes...')
 @bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>', method='POST')
 def connect2(rack_index, unit_index, channel_index):
     global setup
@@ -112,7 +122,7 @@ def disconnect(rack_index, unit_index, channel_index, connection_index):
 # UNITS 
 
 def add_unit0(rack_index, unit_index, uri):
-    print('adding unit {}:{} uri {}'.format(rack_index, unit_index, uri))
+    logging.info('adding unit {}:{} uri {}'.format(rack_index, unit_index, uri))
     unit = units_map[uri]
     unit_type = unit['type']
     input_control_ports = []
@@ -127,7 +137,7 @@ def add_unit0(rack_index, unit_index, uri):
         for port_index in range(unit['data'].get_num_ports()):
             port = unit['data'].get_port_by_index(port_index)
             if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/ext/atom#InputPort')) or port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#ControlPort')):
-                print('port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
+                logging.debug('port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
                 port_range = [0, -1, 1]
                 lilv_port_range = port.get_range()
                 if lilv_port_range[0] is not None:
@@ -228,7 +238,7 @@ def upload_setup2():
     upload = bottle.request.files.get('upload')
     upload_contents = io.BytesIO()
     upload.save(upload_contents)
-    print(upload_contents.getvalue())
+    logging.info(upload_contents.getvalue())
     global setup
     setup = json.loads(upload_contents.getvalue())
     rewire()
@@ -263,7 +273,7 @@ def resetet():
 def static(filepath):
     return bottle.static_file(filepath, root='static/')
 
-print('-> adding example data...')
+logging.info('-> adding example data...')
 
 add_rack0(0)
 
@@ -293,15 +303,15 @@ if False:
     add_unit(0, 3, 'http://guitarix.sourceforge.net/plugins/gx_voodoo_#_voodoo_')
     add_unit(0, len(setup['racks'][0]), output_uri)
     
-    print(json.dumps(setup))
+    logging.info(json.dumps(setup))
     
 
-print('-> starting bottle server...')
+logging.info('-> starting bottle server...')
 bottle.run(host='0.0.0.0', port='8080', debug=True)
 
 
 for key, value in subprocess_map.items():
-    print('terminating subprocess {}'.format(key))
+    logging.info('terminating subprocess {}'.format(key))
     value.stdin.close()
     value.terminate()
     value.wait()
