@@ -14,7 +14,7 @@
                 % for uri, unit in units.items():
                     <tr>
                         <td><a href="/add2{{remaining_path}}/{{map_index}}">{{unit['name']}}</td>
-                        <td><span>{{uri}}</td>
+                        <td><span>{{uri}}</span></td>
                     </tr>
                     % map_index = map_index + 1
                 % end

@@ -78,15 +78,17 @@ print('-> creating setup...')
 setup = create_setup()
 
 
-print('-> setting up routes...')
 # WIRING
 def rewire():
-    pass
+    print('-> rewire')
+    global setup
 
+print('-> setting up routes...')
 @bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>', method='POST')
 def connect2(rack_index, unit_index, channel_index):
     global setup
     setup['racks'][rack_index][unit_index]['connections'][channel_index].insert(0,  bottle.request.forms.get('port'))
+    rewire()
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 @bottle.route('/connect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<direction:path>')
@@ -100,6 +102,7 @@ def connect(rack_index, unit_index, channel_index, direction):
 def disconnect0(rack_index, unit_index, channel_index, connection_index):
     global setup
     del setup['racks'][rack_index][unit_index]['connections'][channel_index][connection_index]
+    rewire()
 
 @bottle.route('/disconnect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<connection_index:int>')
 def disconnect(rack_index, unit_index, channel_index, connection_index):
@@ -138,7 +141,7 @@ def add_unit0(rack_index, unit_index, uri):
                 input_control_ports.append(control_port)
 
     unit_uuid = str(uuid.uuid4())
-    subprocess_map[unit_uuid] = subprocess.Popen(['jalv', '-n', '{}-{}'.format(unit_uuid[0:8], unit_name), uri], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # subprocess_map[unit_uuid] = subprocess.Popen(['jalv', '-n', '{}-{}'.format(unit_uuid[0:8], unit_name), uri], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     setup['racks'][rack_index].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction })
 
     rewire()
@@ -164,11 +167,18 @@ def add_unit(rack_index, unit_index):
 
 def delete_unit0(rack_index, unit_index):
     global setup
+    unit = setup['racks'][rack_index][unit_index]
+    #if unit['type'] == 'special':
+    #    pass
+    #else:
+    #    subprocess_map[unit['uuid']].stdin.close()
+    #    del subprocess_map[unit['uuid']]
     del setup['racks'][rack_index][unit_index]
     rewire()
 
 @bottle.route('/delete/<rack_index:int>/<unit_index:int>')
 def delete_unit(rack_index, unit_index):
+    global setup
     delete_unit0(rack_index, unit_index)
     bottle.redirect('/#rack-{}'.format(rack_index))
 
@@ -189,6 +199,7 @@ def add_rack(rack_index):
 def delete_rack(rack_index):
     global setup
     del setup['racks'][int(rack_index)]
+    rewire()
     bottle.redirect('/')
     
 
@@ -220,6 +231,7 @@ def upload_setup2():
     print(upload_contents.getvalue())
     global setup
     setup = json.loads(upload_contents.getvalue())
+    rewire()
     bottle.redirect('/')
 
 @bottle.route('/upload')
@@ -228,10 +240,6 @@ def upload_setup():
     return dict({'remaining_path': ''})
     
 
-
-@bottle.route('/plugins')
-def plugins():
-    return '\n'.join(['<p>{}</p>'.format(str(plugin.get_uri())) for plugin in lilv_plugins])
 
 @bottle.route('/')
 @bottle.view('index')
@@ -243,6 +251,7 @@ def index():
 def resetet0():
     global setup
     setup = create_setup()
+    rewire()
 
 @bottle.route('/reset')
 def resetet():
