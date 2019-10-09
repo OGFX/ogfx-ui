@@ -93,9 +93,35 @@ setup = create_setup()
 
 
 # WIRING
+def unit_in_setup(unit_uuid):
+    global setup
+    global subprocess_map
+    for rack in setup['racks']:
+        for unit in rack:
+            if unit['uuid'] == unit_uuid:
+                return True
+    return False
+
+def remove_leftover_subprocesses():
+    global subprocess_map
+    global setup
+    for unit_uuid in list(subprocess_map.keys()):
+        if not unit_in_setup(unit_uuid):
+            logging.info('removing unit {}'.format(unit_uuid))
+            subprocess_map[unit_uuid].stdin.close()
+            subprocess_map[unit_uuid].terminate()
+            subprocess_map[unit_uuid].wait()
+            del subprocess_map[unit_uuid]
+
 def rewire():
     logging.info('-> rewire')
     global setup
+    global subprocess_map
+    for rack in setup['racks']:
+        for unit in rack:
+            if unit['uuid'] not in subprocess_map:
+                subprocess_map[unit['uuid']] = subprocess.Popen(['jalv', '-n', '{}-{}'.format(unit['uuid'][0:8], unit['name']), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    remove_leftover_subprocesses()
 
 logging.info('-> setting up routes...')
 @bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>', method='POST')
@@ -155,7 +181,6 @@ def add_unit0(rack_index, unit_index, uri):
                 input_control_ports.append(control_port)
 
     unit_uuid = str(uuid.uuid4())
-    # subprocess_map[unit_uuid] = subprocess.Popen(['jalv', '-n', '{}-{}'.format(unit_uuid[0:8], unit_name), uri], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     setup['racks'][rack_index].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction })
 
     rewire()
