@@ -171,15 +171,15 @@ def add_unit0(rack_index, unit_index, uri):
     if unit_type == unit_type_lv2:
         for port_index in range(unit['data'].get_num_ports()):
             port = unit['data'].get_port_by_index(port_index)
-            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#InputPort')) or port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#AudioPort')):
+            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#InputPort')) and port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#AudioPort')):
                 logging.debug('input audio port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
                 input_audio_ports.append({ 'name': str(port.get_name()), 'symbol': str(port.get_symbol())})
 
-            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#OutputPort')) or port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#AudioPort')):
+            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#OutputPort')) and port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#AudioPort')):
                 logging.debug('output audio port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
                 output_audio_ports.append({ 'name': str(port.get_name()), 'symbol': str(port.get_symbol())})
 
-            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/ext/atom#InputPort')) or port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#ControlPort')):
+            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#InputPort')) and port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#ControlPort')):
                 logging.debug('input control port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
                 port_range = [0, -1, 1]
                 lilv_port_range = port.get_range()
