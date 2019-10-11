@@ -44,11 +44,11 @@
                 <div class="operations">
                     <a href="moveup/{{rack_index}}">▲</a> 
                     <a href="movedown/{{rack_index}}">▼</a> 
-                    <a href="save/{{rack_index}}">save</a> 
+                    <a href="save/{{rack_index}}">sv</a> 
                     <a href="saveas/{{rack_index}}">(as)</a> 
-                    <a href="load/{{rack_index}}">load</a> 
+                    <a href="load/{{rack_index}}">ld</a> 
                     <a href="reset/{{rack_index}}">rst</a>
-                    <a href="delete/{{rack_index}}">del</a>
+                    <a href="delete/{{rack_index}}">rm</a>
                     <a href="upload/{{rack_index}}">ul</a> 
                     <a href="download/{{rack_index}}" download="ogfx-rack.json">dl</a> 
                 </div>
@@ -65,11 +65,11 @@
                     <div class="operations">
                         <a href="moveup/{{rack_index}}/{{unit_index}}">▲</a> 
                         <a href="movedown/{{rack_index}}/{{unit_index}}">▼</a> 
-                        <a href="save/{{rack_index}}/{{unit_index}}">save</a> 
+                        <a href="save/{{rack_index}}/{{unit_index}}">sv</a> 
                         <a href="saveas/{{rack_index}}/{{unit_index}}">(as)</a> 
-                        <a href="load/{{rack_index}}/{{unit_index}}">load</a> 
+                        <a href="load/{{rack_index}}/{{unit_index}}">ld</a> 
                         <a href="reset/{{rack_index}}/{{unit_index}}">rst</a> 
-                        <a href="delete/{{rack_index}}/{{unit_index}}">del</a>
+                        <a href="delete/{{rack_index}}/{{unit_index}}">rm</a>
                         <a href="upload/{{rack_index}}/{{unit_index}}">ul</a> 
                         <a href="download/{{rack_index}}/{{unit_index}}" download="ogfx-unit.json">dl</a> 
                     </div>

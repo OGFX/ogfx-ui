@@ -23,7 +23,7 @@ arguments_parser.add_argument('--setup', dest='setup', action='store', help='A f
 arguments = arguments_parser.parse_args()
 
 
-log_levels_map = {1: logging.DEBUG, 2: logging.INFO, 3: logging.WARNING, 4: logging.ERROR, 5: logging.CRITICAL}
+log_levels_map = {5: logging.DEBUG, 4: logging.INFO, 3: logging.WARNING, 2: logging.ERROR, 1: logging.CRITICAL}
 
 logging.basicConfig(level=log_levels_map[arguments.log_level], format='%(asctime)s %(message)s')
 
@@ -113,6 +113,9 @@ def remove_leftover_subprocesses():
             subprocess_map[unit_uuid].wait()
             del subprocess_map[unit_uuid]
 
+def unit_jack_client_name(unit):
+    return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
+
 def rewire():
     logging.info('-> rewire')
     global setup
@@ -120,7 +123,7 @@ def rewire():
     for rack in setup['racks']:
         for unit in rack:
             if unit['uuid'] not in subprocess_map:
-                subprocess_map[unit['uuid']] = subprocess.Popen(['jalv', '-n', '{}-{}'.format(unit['uuid'][0:8], unit['name']), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess_map[unit['uuid']] = subprocess.Popen(['jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     remove_leftover_subprocesses()
 
 logging.info('-> setting up routes...')
@@ -156,6 +159,8 @@ def add_unit0(rack_index, unit_index, uri):
     unit = units_map[uri]
     unit_type = unit['type']
     input_control_ports = []
+    input_audio_ports = []
+    output_audio_ports = []
     connections = []
     direction = ''
     unit_name = unit['name']
@@ -166,8 +171,16 @@ def add_unit0(rack_index, unit_index, uri):
     if unit_type == unit_type_lv2:
         for port_index in range(unit['data'].get_num_ports()):
             port = unit['data'].get_port_by_index(port_index)
+            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#InputPort')) or port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#AudioPort')):
+                logging.debug('input audio port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
+                input_audio_ports.append({ 'name': str(port.get_name()), 'symbol': str(port.get_symbol())})
+
+            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#OutputPort')) or port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#AudioPort')):
+                logging.debug('output audio port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
+                output_audio_ports.append({ 'name': str(port.get_name()), 'symbol': str(port.get_symbol())})
+
             if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/ext/atom#InputPort')) or port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#ControlPort')):
-                logging.debug('port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
+                logging.debug('input control port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
                 port_range = [0, -1, 1]
                 lilv_port_range = port.get_range()
                 if lilv_port_range[0] is not None:
@@ -181,7 +194,7 @@ def add_unit0(rack_index, unit_index, uri):
                 input_control_ports.append(control_port)
 
     unit_uuid = str(uuid.uuid4())
-    setup['racks'][rack_index].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction })
+    setup['racks'][rack_index].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction })
 
     rewire()
 
