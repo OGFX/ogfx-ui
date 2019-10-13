@@ -11,9 +11,9 @@
 <div id="top-menu">
     <span>setup: {{setup['name']}}</span>
     <div class="operations">
-        <a href="save">save</a> 
+        <a href="save">sv</a> 
         <a href="saveas">(as)</a> 
-        <a href="load">load</a> 
+        <a href="load">ld</a> 
         <a href="reset">rst</a>
         <a href="upload">ul</a>
         <a href="download" download="ogfx-setup.json">dl</a>
@@ -40,6 +40,7 @@
         <div class="rack" id="rack-{{rack_index}}">
             <div>
                 <span>{{rack_index}}._._:</span>
+                <input type="checkbox" checked="{{rack['enabled']}}">
                 <span>rack-{{rack_index}}</span>
                 <div class="operations">
                     <a href="moveup/{{rack_index}}">▲</a> 
@@ -57,10 +58,11 @@
                 <a href="add/{{rack_index}}/0">add unit</a>
             </div>
             % unit_index = 0
-            % for unit in rack:
+            % for unit in rack['units']:
             <div class="unit" id="unit-{{rack_index}}-{{unit_index}}">
                 <div class="unit-info">
                     <span>{{rack_index}}.{{unit_index}}._:</span>
+                    <input type="checkbox" checked="{{unit['enabled']}}">
                     <span>{{unit['name']}}</span>
                     <div class="operations">
                         <a href="moveup/{{rack_index}}/{{unit_index}}">▲</a> 
@@ -98,6 +100,8 @@
                     % for port in unit['input_control_ports']:
                         <div id="port-{{rack_index}}-{{unit_index}}-{{port_index}}">
                             <span>{{rack_index}}.{{unit_index}}.{{port_index}}:</span>
+                            <a href="/cc/{{rack_index}}/{{unit_index}}/{{port_index}}">cc</a>
+                            <span>--:--:lin</span>
                             <span>{{port['name']}}</span>
                             <div class="control-input-container">
                                 <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off">

@@ -14,6 +14,8 @@ import jack
 import logging
 import rtmidi
 import argparse
+import rtmidi
+
 
 arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
 arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=3)
@@ -27,15 +29,26 @@ log_levels_map = {5: logging.DEBUG, 4: logging.INFO, 3: logging.WARNING, 2: logg
 
 logging.basicConfig(level=log_levels_map[arguments.log_level], format='%(asctime)s %(message)s')
 
-logging.info(os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'setups'))
+setups_path = os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'setups')
+
+if not os.path.exists(setups_path):
+    logging.info('creating setups path {}'.format(setups_path))
+    os.makedirs(setups_path)
+
+logging.info('using setups path {}'.format(setups_path))
+default_setup_file_path = os.path.join(setups_path, 'default_setup.json')
+
+logging.info('creating midi client...')
+midiin = rtmidi.MidiIn(rtmidi.API_UNIX_JACK, name='ogfx')
+midiin.open_virtual_port(name='in')
 
 
-logging.info('-> creating jack client...')
+logging.info('creating jack client...')
 jack_client = jack.Client('OGFX')
 
 units_map = dict()
 
-logging.info('-> registering special units...')
+logging.info('registering special units...')
 special_units = dict()
 
 # Some special names:
@@ -66,20 +79,20 @@ units_map[stereo_return_uri] = {'type': 'special', 'name': 'stereo_return', 'dir
 unit_type_lv2 = 'lv2'
 unit_type_special = 'special'
 
-logging.info('-> creating lilv world...')
+logging.info('creating lilv world...')
 lilv_world = lilv.World()
-logging.info('-> load_all...')
+logging.info('load_all...')
 lilv_world.load_all()
-logging.info('-> get_all_plugins...')
+logging.info('get_all_plugins...')
 lilv_plugins = lilv_world.get_all_plugins()
 
-logging.info('-> registering lv2 plugins...')
+logging.info('registering lv2 plugins...')
 for p in lilv_plugins:
     # logging.info(str(p.get_uri()))
     logging.debug(str(p.get_uri()))
     units_map[str(p.get_uri())] = {'type': 'lv2', 'name': str(p.get_name()), 'data': p }
 
-logging.info('-> creating subprocess map...')
+logging.info('creating subprocess map...')
 
 subprocess_map = dict()
 
@@ -88,7 +101,7 @@ def create_setup():
     return {'name': 'new setup', 'racks': [] }
 
 
-logging.info('-> creating setup...')
+logging.info('creating setup...')
 setup = create_setup()
 
 
@@ -97,7 +110,7 @@ def unit_in_setup(unit_uuid):
     global setup
     global subprocess_map
     for rack in setup['racks']:
-        for unit in rack:
+        for unit in rack['units']:
             if unit['uuid'] == unit_uuid:
                 return True
     return False
@@ -117,20 +130,20 @@ def unit_jack_client_name(unit):
     return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
 
 def rewire():
-    logging.info('-> rewire')
+    logging.info('rewire')
     global setup
     global subprocess_map
     for rack in setup['racks']:
-        for unit in rack:
+        for unit in rack['units']:
             if unit['uuid'] not in subprocess_map:
                 subprocess_map[unit['uuid']] = subprocess.Popen(['jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     remove_leftover_subprocesses()
 
-logging.info('-> setting up routes...')
-@bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>', method='POST')
+logging.info('setting up routes...')
+bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>', method='POST')
 def connect2(rack_index, unit_index, channel_index):
     global setup
-    setup['racks'][rack_index][unit_index]['connections'][channel_index].insert(0,  bottle.request.forms.get('port'))
+    setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index].insert(0,  bottle.request.forms.get('port'))
     rewire()
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
@@ -144,7 +157,7 @@ def connect(rack_index, unit_index, channel_index, direction):
 
 def disconnect0(rack_index, unit_index, channel_index, connection_index):
     global setup
-    del setup['racks'][rack_index][unit_index]['connections'][channel_index][connection_index]
+    del setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index][connection_index]
     rewire()
 
 @bottle.route('/disconnect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<connection_index:int>')
@@ -194,12 +207,12 @@ def add_unit0(rack_index, unit_index, uri):
                 input_control_ports.append(control_port)
 
     unit_uuid = str(uuid.uuid4())
-    setup['racks'][rack_index].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction })
+    setup['racks'][rack_index]['units'].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True })
 
     rewire()
 
 def append_unit0(rack_index, uri):
-    add_unit0(rack_index, len(setup['racks'][rack_index]), uri)
+    add_unit0(rack_index, len(setup['racks'][rack_index]['units']), uri)
 
 @bottle.route('/add/<rack_index:int>/<unit_index:int>/<uri>')
 def add_unit(rack_index, unit_index, uri):
@@ -219,13 +232,13 @@ def add_unit(rack_index, unit_index):
 
 def delete_unit0(rack_index, unit_index):
     global setup
-    unit = setup['racks'][rack_index][unit_index]
+    unit = setup['racks'][rack_index]['units'][unit_index]
     #if unit['type'] == 'special':
     #    pass
     #else:
     #    subprocess_map[unit['uuid']].stdin.close()
     #    del subprocess_map[unit['uuid']]
-    del setup['racks'][rack_index][unit_index]
+    del setup['racks'][rack_index]['unit'][unit_index]
     rewire()
 
 @bottle.route('/delete/<rack_index:int>/<unit_index:int>')
@@ -239,7 +252,7 @@ def delete_unit(rack_index, unit_index):
 
 def add_rack0(rack_index):
     global setup
-    setup['racks'].insert(int(rack_index), [])
+    setup['racks'].insert(int(rack_index), {'enabled': True, 'units': []})
     rewire()
 
 @bottle.route('/add/<rack_index>')
@@ -270,7 +283,7 @@ def download_rack(rack_index):
 @bottle.route('/download/<rack_index:int>/<unit_index:int>')
 def download_rack(rack_index, unit_index):
     bottle.response.content_type = 'text/json'
-    return json.dumps(setup['racks'][rack_index][unit_index], indent=2)
+    return json.dumps(setup['racks'][rack_index]['units'][unit_index], indent=2)
 
 
 # UPLOADS
@@ -315,7 +328,7 @@ def resetet():
 def static(filepath):
     return bottle.static_file(filepath, root='static/')
 
-logging.info('-> adding example data...')
+logging.info('adding example data...')
 
 add_rack0(0)
 
@@ -348,7 +361,7 @@ if False:
     logging.info(json.dumps(setup))
     
 
-logging.info('-> starting bottle server...')
+logging.info('starting bottle server...')
 bottle.run(host='0.0.0.0', port='8080', debug=True)
 
 
