@@ -15,11 +15,14 @@ import logging
 import rtmidi
 import argparse
 import rtmidi
+import socket
 
 
 arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
 arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=3)
 arguments_parser.add_argument('--setup', dest='setup', action='store', help='A file containing a setup to load at startup')
+arguments_parser.add_argument('--mod-host-control-port', type=int, default=5555)
+arguments_parser.add_argument('--mod-host-feedback-port', type=int, default=6666)
 
 
 arguments = arguments_parser.parse_args()
@@ -39,7 +42,7 @@ logging.info('using setups path {}'.format(setups_path))
 default_setup_file_path = os.path.join(setups_path, 'default_setup.json')
 
 logging.info('creating midi client...')
-midiin = rtmidi.MidiIn(rtmidi.API_UNIX_JACK, name='ogfx')
+midiin = rtmidi.MidiIn(rtmidi.API_UNIX_JACK, name='ogfx-midi')
 midiin.open_virtual_port(name='in')
 
 
@@ -139,21 +142,26 @@ def rewire():
                 subprocess_map[unit['uuid']] = subprocess.Popen(['jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     remove_leftover_subprocesses()
 
+ports = []
+
 logging.info('setting up routes...')
-bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>', method='POST')
-def connect2(rack_index, unit_index, channel_index):
+@bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>/<port_index:int>')
+def connect2(rack_index, unit_index, channel_index, port_index):
     global setup
-    setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index].insert(0,  bottle.request.forms.get('port'))
+    setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index].insert(0,  ports[port_index].name)
     rewire()
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 @bottle.route('/connect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<direction:path>')
 @bottle.view('connect')
 def connect(rack_index, unit_index, channel_index, direction):
+    global ports
     if direction == 'output':
-        return dict({'ports': jack_client.get_ports(is_input=True, is_audio=True), 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
+        ports = jack_client.get_ports(is_input=True, is_audio=True)
+        return dict({'ports': ports, 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
     else:
-        return dict({'ports': jack_client.get_ports(is_output=True, is_audio=True), 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
+        ports = jack_client.get_ports(is_output=True, is_audio=True)
+        return dict({'ports': ports, 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
 
 def disconnect0(rack_index, unit_index, channel_index, connection_index):
     global setup

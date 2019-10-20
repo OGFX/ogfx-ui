@@ -9,11 +9,12 @@
     <body>
         <div class="rack">
             <span>Choose a port to connect to:</span>
-            <form action="/connect2{{remaining_path}}" method="post" enctype="multipart/form-data">
+            <table>
+                % index = 0
                 % for port in ports:
-                    <p><input type="submit" name="port" value="{{port.name}}"><p>
+                    <tr><td><a href="/connect2{{remaining_path}}/{{index}}">{{port.name}}</a></td></tr>
+                    % index = index + 1
                 %end
-            </form>
         </div>
     </body>
 </html>
