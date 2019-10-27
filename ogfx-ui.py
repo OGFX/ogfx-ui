@@ -16,6 +16,8 @@ import rtmidi
 import argparse
 import rtmidi
 import socket
+import threading
+import time
 
 
 arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
@@ -56,28 +58,28 @@ special_units = dict()
 
 # Some special names:
 mono_input_uri = 'http://ogfx.fps.io/lv2/ns/mono_input'
-units_map[mono_input_uri] = {'type': 'special', 'name': 'mono_input', 'direction': 'input', 'data': { 'connections': [[]] } }
+units_map[mono_input_uri] = {'type': 'special', 'name': 'mono_input', 'direction': 'input', 'input_audio_ports': [], 'output_audio_ports': ['out'],  'data': { 'connections': [[]] } }
 
 mono_output_uri = 'http://ogfx.fps.io/lv2/ns/mono_output'
-units_map[mono_output_uri] = {'type': 'special', 'name': 'mono_output', 'direction': 'output', 'data': { 'connections': [[]] } }
+units_map[mono_output_uri] = {'type': 'special', 'name': 'mono_output', 'direction': 'output', 'input_audio_ports': ['in'], 'output_audio_ports': [], 'data': { 'connections': [[]] } }
 
 stereo_input_uri = 'http://ogfx.fps.io/lv2/ns/stereo_input'
-units_map[stereo_input_uri] = {'type': 'special', 'name': 'stereo_input', 'direction': 'input', 'data': { 'connections': [[], []] } }
+units_map[stereo_input_uri] = {'type': 'special', 'name': 'stereo_input', 'direction': 'input', 'input_audio_ports': [], 'output_audio_ports': ['out1', 'out2'], 'data': { 'connections': [[], []] } }
 
 stereo_output_uri = 'http://ogfx.fps.io/lv2/ns/stereo_outut'
-units_map[stereo_output_uri] = {'type': 'special', 'name': 'stereo_output', 'direction': 'output', 'data': { 'connections': [[], []] } }
+units_map[stereo_output_uri] = {'type': 'special', 'name': 'stereo_output', 'direction': 'output', 'input_audio_ports': ['in1', 'in2'], 'output_audio_ports': [], 'data': { 'connections': [[], []] } }
 
 mono_send_uri = 'http://ogfx.fps.io/lv2/ns/mono_send'
-units_map[mono_send_uri] = {'type': 'special', 'name': 'mono_send', 'direction': 'output', 'data': { 'connections': [[]] } }
+units_map[mono_send_uri] = {'type': 'special', 'name': 'mono_send', 'direction': 'output', 'input_audio_ports': ['in'], 'output_audio_ports': ['out'], 'data': { 'connections': [[]] } }
 
 mono_return_uri = 'http://ogfx.fps.io/lv2/ns/mono_return'
-units_map[mono_return_uri] = {'type': 'special', 'name': 'mono_return', 'direction': 'input', 'data': { 'connections': [[]] } }
+units_map[mono_return_uri] = {'type': 'special', 'name': 'mono_return', 'direction': 'input', 'input_audio_ports': ['in'], 'output_audio_ports': ['out'], 'data': { 'connections': [[]] } }
 
 stereo_send_uri = 'http://ogfx.fps.io/lv2/ns/stereo_send'
-units_map[stereo_send_uri] = {'type': 'special', 'name': 'stereo_send', 'direction': 'output', 'data': { 'connections': [[], []] } }
+units_map[stereo_send_uri] = {'type': 'special', 'name': 'stereo_send', 'direction': 'output', 'input_audio_ports': ['in1', 'in2'], 'output_audio_ports': ['out1', 'out2'], 'data': { 'connections': [[], []] } }
 
 stereo_return_uri = 'http://ogfx.fps.io/lv2/ns/stereo_return'
-units_map[stereo_return_uri] = {'type': 'special', 'name': 'stereo_return', 'direction': 'input', 'data': { 'connections': [[], []] } }
+units_map[stereo_return_uri] = {'type': 'special', 'name': 'stereo_return', 'direction': 'input', 'input_audio_ports': ['in1', 'in2'], 'output_audio_ports': ['out1', 'out2'], 'data': { 'connections': [[], []] } }
 
 unit_type_lv2 = 'lv2'
 unit_type_special = 'special'
@@ -98,6 +100,7 @@ for p in lilv_plugins:
 logging.info('creating subprocess map...')
 
 subprocess_map = dict()
+connections = []
 
 
 def create_setup():
@@ -124,23 +127,57 @@ def remove_leftover_subprocesses():
     for unit_uuid in list(subprocess_map.keys()):
         if not unit_in_setup(unit_uuid):
             logging.info('removing unit {}'.format(unit_uuid))
-            subprocess_map[unit_uuid].stdin.close()
-            subprocess_map[unit_uuid].terminate()
-            subprocess_map[unit_uuid].wait()
+            for process in subprocess_map[unit_uuid]:
+                process.stdin.close()
+                process.terminate()
+                process.wait()
             del subprocess_map[unit_uuid]
 
 def unit_jack_client_name(unit):
     return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
 
+def switch_unit_jack_client_name(unit):
+    return '{}-{}'.format(unit['uuid'][0:8], 'switch')
+
+def manage_subprocesses():
+    global setup
+    global subprocess_map
+    
+    for rack in setup['racks']:
+        # First let's do the process management
+        for unit in rack['units']:
+            if unit['type'] == 'lv2':
+                if unit['uuid'] not in subprocess_map:
+                    subprocess_map[unit['uuid']] = (
+                        subprocess.Popen(
+                            ['jalv', '-n', switch_unit_jack_client_name(unit), 'http://moddevices.com/plugins/mod-devel/StereoSwitchBox3'], 
+                            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), 
+                        subprocess.Popen(
+                            ['jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
+            if unit['type'] == 'special':
+                pass
+    
+    remove_leftover_subprocesses()
+
 def rewire():
     logging.info('rewire')
     global setup
-    global subprocess_map
+    manage_subprocesses()
+    global connections
+    connections = []
     for rack in setup['racks']:
-        for unit in rack['units']:
-            if unit['uuid'] not in subprocess_map:
-                subprocess_map[unit['uuid']] = subprocess.Popen(['jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    remove_leftover_subprocesses()
+        # First let's do the process management
+        units = rack['units']
+        for unit_index in range(0, len(units)):
+            unit = units[unit_index]
+            if unit['type'] == 'lv2':
+                # Internal connections:
+                if len(unit['input_audio_ports']) >= 1:
+                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'OUT1L'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
+                if len(unit['input_audio_ports']) >= 2:
+                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'OUT1R'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol']))) 
+                
+    
 
 ports = []
 
@@ -187,6 +224,8 @@ def add_unit0(rack_index, unit_index, uri):
     unit_name = unit['name']
     if unit_type == unit_type_special:
         connections = copy.copy(unit['data']['connections'])
+        input_audio_ports = unit['input_audio_ports']
+        output_audio_ports = unit['output_audio_ports']
         direction = unit['direction']
 
     if unit_type == unit_type_lv2:
@@ -336,6 +375,24 @@ def resetet():
 def static(filepath):
     return bottle.static_file(filepath, root='static/')
 
+
+connections_manager_quit = False
+def connections_manager():
+    global connections_manager_quit
+    while not connections_manager_quit:
+        # logging.info('managing connections...')
+        for connection in connections:
+            try:
+                jack_client.connect(connection[0], connection[1])
+            except:
+                pass
+        time.sleep(1)
+
+logging.info('running connections manager thread...')
+connections_manager_thread = threading.Thread(None, connections_manager)
+connections_manager_thread.start()
+
+
 logging.info('adding example data...')
 
 add_rack0(0)
@@ -372,10 +429,9 @@ if False:
 logging.info('starting bottle server...')
 bottle.run(host='0.0.0.0', port='8080', debug=True)
 
+logging.info('shutting down...')
 
-for key, value in subprocess_map.items():
-    logging.info('terminating subprocess {}'.format(key))
-    value.stdin.close()
-    value.terminate()
-    value.wait()
+connections_manager_quit = True
+setup = create_setup()
+rewire()
 
