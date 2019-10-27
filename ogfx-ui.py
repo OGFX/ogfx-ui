@@ -211,11 +211,11 @@ def add_unit0(rack_index, unit_index, uri):
                 if lilv_port_range[2] is not None:
                     port_range[2] = float(str(lilv_port_range[2]))
                 default_value = port_range[0]
-                control_port = { 'name': str(port.get_name()), 'symbol': str(port.get_symbol()), 'range': port_range, 'value': default_value }
+                control_port = { 'name': str(port.get_name()), 'symbol': str(port.get_symbol()), 'range': port_range, 'value': default_value, 'cc': None }
                 input_control_ports.append(control_port)
 
     unit_uuid = str(uuid.uuid4())
-    setup['racks'][rack_index]['units'].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True })
+    setup['racks'][rack_index]['units'].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': None })
 
     rewire()
 
@@ -260,7 +260,7 @@ def delete_unit(rack_index, unit_index):
 
 def add_rack0(rack_index):
     global setup
-    setup['racks'].insert(int(rack_index), {'enabled': True, 'units': []})
+    setup['racks'].insert(int(rack_index), {'enabled': True, 'units': [], 'cc': None})
     rewire()
 
 @bottle.route('/add/<rack_index>')

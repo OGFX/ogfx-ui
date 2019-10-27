@@ -40,6 +40,8 @@
         <div class="rack" id="rack-{{rack_index}}">
             <div>
                 <span>{{rack_index}}._._:</span>
+                 <a href="/cc/{{rack_index}}">cc</a>
+                 <span>--:--</span>
                 <input type="checkbox" checked="{{rack['enabled']}}">
                 <span>rack-{{rack_index}}</span>
                 <div class="operations">
@@ -62,7 +64,10 @@
             <div class="unit" id="unit-{{rack_index}}-{{unit_index}}">
                 <div class="unit-info">
                     <span>{{rack_index}}.{{unit_index}}._:</span>
+                     <a href="/cc/{{rack_index}}/{{unit_index}}">cc</a>
+                     <span>--:--</span>
                     <input type="checkbox" checked="{{unit['enabled']}}">
+                    <span>{{len(unit['input_audio_ports'])}}:{{len(unit['output_audio_ports'])}}</span>
                     <span>{{unit['name']}}</span>
                     <div class="operations">
                         <a href="moveup/{{rack_index}}/{{unit_index}}">▲</a> 
