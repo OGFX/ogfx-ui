@@ -1,8 +1,13 @@
 #!/usr/bin/python3
 
-
+# External dependencies imports
 import lilv
 import bottle
+import jack
+import rtmidi
+import rtmidi
+
+# python3 imports
 import json
 import xdg
 import os
@@ -10,11 +15,8 @@ import copy
 import io
 import subprocess
 import uuid
-import jack
 import logging
-import rtmidi
 import argparse
-import rtmidi
 import socket
 import threading
 import time
@@ -402,21 +404,22 @@ connections_manager_thread = threading.Thread(None, connections_manager)
 connections_manager_thread.start()
 
 
-logging.info('adding example data...')
-
-add_rack0(0)
-
-append_unit0(0, mono_input_uri)
-append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
-append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
-append_unit0(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
-append_unit0(0, 'http://drobilla.net/plugins/mda/DubDelay')
-append_unit0(0, 'http://calf.sourceforge.net/plugins/Reverb')
-append_unit0(0, 'http://plugin.org.uk/swh-plugins/sc4')
-append_unit0(0, 'http://plugin.org.uk/swh-plugins/amp')
-append_unit0(0, stereo_output_uri)
-
+if False:
+    logging.info('adding example data...')
+    
+    add_rack0(0)
+    
+    append_unit0(0, mono_input_uri)
+    append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+    append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
+    append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
+    append_unit0(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
+    append_unit0(0, 'http://drobilla.net/plugins/mda/DubDelay')
+    append_unit0(0, 'http://calf.sourceforge.net/plugins/Reverb')
+    append_unit0(0, 'http://plugin.org.uk/swh-plugins/sc4')
+    append_unit0(0, 'http://plugin.org.uk/swh-plugins/amp')
+    append_unit0(0, stereo_output_uri)
+    
 if False:
     add_rack(0)
     add_unit(0, 0, input_uri)
