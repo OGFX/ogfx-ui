@@ -166,7 +166,6 @@ def rewire():
     global connections
     connections = []
     for rack in setup['racks']:
-        # First let's do the process management
         units = rack['units']
         for unit_index in range(0, len(units)):
             unit = units[unit_index]
@@ -176,6 +175,16 @@ def rewire():
                     connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'OUT1L'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
                 if len(unit['input_audio_ports']) >= 2:
                     connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'OUT1R'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol']))) 
+        for unit_index in range(1, len(units)):
+            unit = units[unit_index]
+            prev_unit = unit[unit_index - 1]
+            if unit['type'] == 'lv2' and prev_unit['type'] == 'lv2':
+                if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
+                    if len(unit['input_audio_ports']) >= 1:
+                        pass
+                    if len(unit['input_audio_ports']) >= 2:
+                        pass
+                
                 
     
 
