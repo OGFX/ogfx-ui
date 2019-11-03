@@ -183,9 +183,11 @@ def rewire():
             if unit['type'] == 'lv2' and prev_unit['type'] == 'lv2':
                 if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
                     if len(unit['input_audio_ports']) >= 1:
-                        pass
+                        connections.append(('{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'OUT2L'), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InL'))) 
+                        connections.append(('{}:{}'.format(unit_jack_client_name(prev_unit), unit['output_audio_ports'][0]['symbol']), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InL'))) 
                     if len(unit['input_audio_ports']) >= 2:
-                        pass
+                        connections.append(('{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'OUT2R'), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InR'))) 
+                        connections.append(('{}:{}'.format(unit_jack_client_name(prev_unit), unit['output_audio_ports'][1]['symbol']), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InR'))) 
                 
                 
     
