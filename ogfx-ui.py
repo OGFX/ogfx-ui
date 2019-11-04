@@ -298,7 +298,7 @@ def delete_unit0(rack_index, unit_index):
     #else:
     #    subprocess_map[unit['uuid']].stdin.close()
     #    del subprocess_map[unit['uuid']]
-    del setup['racks'][rack_index]['unit'][unit_index]
+    del setup['racks'][rack_index]['units'][unit_index]
     rewire()
 
 @bottle.route('/delete/<rack_index:int>/<unit_index:int>')
