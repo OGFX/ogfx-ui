@@ -185,10 +185,10 @@ def rewire():
                 if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
                     if len(unit['input_audio_ports']) >= 1:
                         connections.append(('{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'Out2L'), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InL'))) 
-                        connections.append(('{}:{}'.format(unit_jack_client_name(prev_unit), unit['output_audio_ports'][0]['symbol']), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InL'))) 
+                        connections.append(('{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InL'))) 
                     if len(unit['input_audio_ports']) >= 2:
                         connections.append(('{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'Out2R'), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InR'))) 
-                        connections.append(('{}:{}'.format(unit_jack_client_name(prev_unit), unit['output_audio_ports'][1]['symbol']), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InR'))) 
+                        connections.append(('{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InR'))) 
                 
                 
     
