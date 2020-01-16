@@ -38,8 +38,45 @@ int main(int argc, char* argv[])
       } else {
         std::cout << "      , ";
       }
-      std::cout << "\"symbol\": \"" << lilv_node_as_string(port_symbol_node) << "\"\n";
+      std::cout << "{\n";
+      std::cout << "          \"symbol\": \"" << lilv_node_as_string(port_symbol_node) << "\",\n";
+
+      std::cout << "          \"http://lv2plug.in/ns/lv2core#InputPort\":";
+      if (lilv_port_is_a(plugin, port, lilv_new_uri(world, "http://lv2plug.in/ns/lv2core#InputPort"))) {
+        std::cout << " true";
+      } else {
+        std::cout << " false";
+      }
+      std::cout << ",\n";
+      
+      std::cout << "          \"http://lv2plug.in/ns/lv2core#OutputPort\":";
+      if (lilv_port_is_a(plugin, port, lilv_new_uri(world, "http://lv2plug.in/ns/lv2core#OutputPort"))) {
+        std::cout << " true";
+      } else {
+        std::cout << " false";
+      }
+      std::cout << ",\n";
+      
+      std::cout << "          \"http://lv2plug.in/ns/lv2core#AudioPort\":";
+      if (lilv_port_is_a(plugin, port, lilv_new_uri(world, "http://lv2plug.in/ns/lv2core#AudioPort"))) {
+        std::cout << " true";
+      } else {
+        std::cout << " false";
+      }
+      std::cout << ",\n";
+      
+      std::cout << "          \"http://lv2plug.in/ns/lv2core#ControlPort\":";
+      if (lilv_port_is_a(plugin, port, lilv_new_uri(world, "http://lv2plug.in/ns/lv2core#ControlPort"))) {
+        std::cout << " true";
+      } else {
+        std::cout << " false";
+      }
+      std::cout << "\n";
+      
+      std::cout << "        }\n";
     }
+    // ports
+    std::cout << "     ]\n";
     
     std::cout << "  }";
     
