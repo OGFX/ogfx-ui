@@ -72,6 +72,15 @@ int main(int argc, char* argv[])
         std::cout << " false";
       }
       std::cout << "\n";
+
+      LilvNode *default_value;
+      LilvNode *minimum_value;
+      LilvNode *maximum_value;
+
+      lilv_port_get_range(plugin, port, &default_value, &minimum_value, &maximum_value);
+      if (NULL != default_value && NULL != minimum_value && NULL != maximum_value) {
+
+      }
       
       std::cout << "        }\n";
     }
