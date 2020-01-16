@@ -1,6 +1,5 @@
 #include <lilv/lilv.h>
 #include <cstdlib>
-#include <boost/program_options.hpp>
 #include <iostream>
 
 /**
@@ -32,14 +31,18 @@ int main(int argc, char* argv[])
     for (uint32_t port_index = 0; port_index < lilv_plugin_get_num_ports(plugin); ++port_index) {
       const LilvPort *port = lilv_plugin_get_port_by_index(plugin, port_index);
 
-      const LilvNode *port_symbol_node = lilv_port_get_symbol(plugin, port);
       if (0 == port_index) {
         std::cout << "        ";
       } else {
         std::cout << "      , ";
       }
       std::cout << "{\n";
+
+      const LilvNode *port_symbol_node = lilv_port_get_symbol(plugin, port);
       std::cout << "          \"symbol\": \"" << lilv_node_as_string(port_symbol_node) << "\",\n";
+
+      const LilvNode *port_name_node = lilv_port_get_name(plugin, port);
+      std::cout << "          \"name\": \"" << lilv_node_as_string(port_name_node) << "\",\n";
 
       std::cout << "          \"http://lv2plug.in/ns/lv2core#InputPort\":";
       if (lilv_port_is_a(plugin, port, lilv_new_uri(world, "http://lv2plug.in/ns/lv2core#InputPort"))) {
@@ -71,16 +74,21 @@ int main(int argc, char* argv[])
       } else {
         std::cout << " false";
       }
-      std::cout << "\n";
+      std::cout << ",\n";
 
+      std::cout << "          \"range\": ";
       LilvNode *default_value;
       LilvNode *minimum_value;
       LilvNode *maximum_value;
 
       lilv_port_get_range(plugin, port, &default_value, &minimum_value, &maximum_value);
       if (NULL != default_value && NULL != minimum_value && NULL != maximum_value) {
-
+	std::cout << "[ " << lilv_node_as_float(default_value) << ", " << lilv_node_as_float(minimum_value) << ", " << lilv_node_as_float(maximum_value) << " ]";
+      } else {
+	// FIXME: What about defaults if the port has no info?
+	std::cout << "[ 0, -1, 1 ]";
       }
+      std::cout << "\n";
       
       std::cout << "        }\n";
     }

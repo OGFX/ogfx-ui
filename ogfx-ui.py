@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 
 # External dependencies imports
-import lilv
 import bottle
-import jack
-import rtmidi
-import rtmidi
 
 # python3 imports
 import json
@@ -20,17 +16,16 @@ import argparse
 import socket
 import threading
 import time
-
+import sys
+import traceback
 
 arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
 arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=3)
 arguments_parser.add_argument('--setup', dest='setup', action='store', help='A file containing a setup to load at startup')
-arguments_parser.add_argument('--mod-host-control-port', type=int, default=5555)
-arguments_parser.add_argument('--mod-host-feedback-port', type=int, default=6666)
-
+# arguments_parser.add_argument('--mod-host-control-port', type=int, default=5555)
+# arguments_parser.add_argument('--mod-host-feedback-port', type=int, default=6666)
 
 arguments = arguments_parser.parse_args()
-
 
 log_levels_map = {5: logging.DEBUG, 4: logging.INFO, 3: logging.WARNING, 2: logging.ERROR, 1: logging.CRITICAL}
 
@@ -45,13 +40,13 @@ if not os.path.exists(setups_path):
 logging.info('using setups path {}'.format(setups_path))
 default_setup_file_path = os.path.join(setups_path, 'default_setup.json')
 
-logging.info('creating midi client...')
-midiin = rtmidi.MidiIn(rtmidi.API_UNIX_JACK, name='ogfx-midi')
-midiin.open_virtual_port(name='in')
+# logging.info('creating midi client...')
+# midiin = rtmidi.MidiIn(rtmidi.API_UNIX_JACK, name='ogfx-midi')
+# midiin.open_virtual_port(name='in')
 
 
-logging.info('creating jack client...')
-jack_client = jack.Client('OGFX')
+# logging.info('creating jack client...')
+# jack_client = jack.Client('OGFX')
 
 units_map = dict()
 
@@ -86,18 +81,30 @@ units_map[stereo_return_uri] = {'type': 'special', 'name': 'stereo_return', 'dir
 unit_type_lv2 = 'lv2'
 unit_type_special = 'special'
 
-logging.info('creating lilv world...')
-lilv_world = lilv.World()
-logging.info('load_all...')
-lilv_world.load_all()
-logging.info('get_all_plugins...')
-lilv_plugins = lilv_world.get_all_plugins()
+logging.info('scanning for lv2 plugins...')
+lv2_world_json_string = subprocess.check_output(['./lv2lsjson'])
+# logging.info('here is the json list...')
+# logging.info(lv2_world_json_string)
+lv2_world = json.loads(lv2_world_json_string)
+logging.info('number of plugins: {}'.format(len(lv2_world)))
+
+# for plugin in lv2_world:
+#     logging.info('{} ({})'.format(plugin['name'], plugin['uri']))
+
+# sys.exit()
+
+# logging.info('creating lilv world...')
+# lilv_world = lilv.World()
+# logging.info('load_all...')
+# lilv_world.load_all()
+# logging.info('get_all_plugins...')
+# lilv_plugins = lilv_world.get_all_plugins()
 
 logging.info('registering lv2 plugins...')
-for p in lilv_plugins:
+for p in lv2_world:
     # logging.info(str(p.get_uri()))
-    logging.debug(str(p.get_uri()))
-    units_map[str(p.get_uri())] = {'type': 'lv2', 'name': str(p.get_name()), 'data': p }
+    logging.debug('{} ({})'.format(p['name'], p['uri']))
+    units_map[p['uri']] = {'type': 'lv2', 'name': p['name'], 'data': p }
 
 logging.info('creating subprocess map...')
 
@@ -236,6 +243,7 @@ def add_unit0(rack_index, unit_index, uri):
     connections = []
     direction = ''
     unit_name = unit['name']
+    
     if unit_type == unit_type_special:
         connections = copy.copy(unit['data']['connections'])
         input_audio_ports = unit['input_audio_ports']
@@ -243,28 +251,19 @@ def add_unit0(rack_index, unit_index, uri):
         direction = unit['direction']
 
     if unit_type == unit_type_lv2:
-        for port_index in range(unit['data'].get_num_ports()):
-            port = unit['data'].get_port_by_index(port_index)
-            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#InputPort')) and port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#AudioPort')):
-                logging.debug('input audio port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
-                input_audio_ports.append({ 'name': str(port.get_name()), 'symbol': str(port.get_symbol())})
+        for port_index in range(len(unit['data']['ports'])):
+            port = unit['data']['ports'][port_index]
+            if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#AudioPort']:
+                logging.debug('input audio port {} {}'.format(port['name'], port['symbol']))
+                input_audio_ports.append({ 'name': port['name'], 'symbol': port['symbol']})
 
-            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#OutputPort')) and port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#AudioPort')):
-                logging.debug('output audio port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
-                output_audio_ports.append({ 'name': str(port.get_name()), 'symbol': str(port.get_symbol())})
+            if port['http://lv2plug.in/ns/lv2core#OutputPort'] and port['http://lv2plug.in/ns/lv2core#AudioPort']:
+                logging.debug('output audio port {} {}'.format(port['name'], port['symbol']))
+                output_audio_ports.append({ 'name': port['name'], 'symbol': port['symbol']})
 
-            if port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#InputPort')) and port.is_a(lilv_world.new_uri('http://lv2plug.in/ns/lv2core#ControlPort')):
-                logging.debug('input control port {} {}'.format(str(port.get_name()), str(port.get_symbol())))
-                port_range = [0, -1, 1]
-                lilv_port_range = port.get_range()
-                if lilv_port_range[0] is not None:
-                    port_range[0] = float(str(lilv_port_range[0]))
-                if lilv_port_range[1] is not None:
-                    port_range[1] = float(str(lilv_port_range[1]))
-                if lilv_port_range[2] is not None:
-                    port_range[2] = float(str(lilv_port_range[2]))
-                default_value = port_range[0]
-                control_port = { 'name': str(port.get_name()), 'symbol': str(port.get_symbol()), 'range': port_range, 'value': default_value, 'cc': None }
+            if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#ControlPort']:
+                logging.debug('input control port {} {}'.format(port['name'], port['symbol']))
+                control_port = { 'name': port['name'], 'symbol': port['symbol'], 'range': port['range'], 'value': port['range'][0], 'cc': None }
                 input_control_ports.append(control_port)
 
     unit_uuid = str(uuid.uuid4())
@@ -397,7 +396,8 @@ def connections_manager():
         # logging.info('managing connections...')
         for connection in connections:
             try:
-                jack_client.connect(connection[0], connection[1])
+                # jack_client.connect(connection[0], connection[1])
+                subprocess.check_call(['jack_connect', connection[0], connection[1]])
             except:
                 pass
         time.sleep(1)
@@ -406,40 +406,45 @@ logging.info('running connections manager thread...')
 connections_manager_thread = threading.Thread(None, connections_manager)
 connections_manager_thread.start()
 
-
-if False:
-    logging.info('adding example data...')
+try:
+    if True:
+        logging.info('adding example data...')
+        
+        add_rack0(0)
     
-    add_rack0(0)
-    
-    append_unit0(0, mono_input_uri)
-    append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-    append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
-    append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
-    append_unit0(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
-    append_unit0(0, 'http://drobilla.net/plugins/mda/DubDelay')
-    append_unit0(0, 'http://calf.sourceforge.net/plugins/Reverb')
-    append_unit0(0, 'http://plugin.org.uk/swh-plugins/sc4')
-    append_unit0(0, 'http://plugin.org.uk/swh-plugins/amp')
-    append_unit0(0, stereo_output_uri)
-    
-if False:
-    add_rack(0)
-    add_unit(0, 0, input_uri)
-    setup['racks'][0][0]['connections'].add(0, 'jack#system:capture_1')
-    add_unit(0, 1, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-    add_unit(0, 2, 'http://guitarix.sourceforge.net/plugins/gx_amp_stereo#GUITARIX_ST')
-    add_unit(0, len(setup['racks'][0]), output_uri)
-    
-    add_rack(0)
-    add_unit(0, 0, input_uri)
-    add_unit(0, 1, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-    add_unit(0, 2, 'http://guitarix.sourceforge.net/plugins/gx_amp_stereo#GUITARIX_ST')
-    add_unit(0, 3, 'http://guitarix.sourceforge.net/plugins/gx_voodoo_#_voodoo_')
-    add_unit(0, len(setup['racks'][0]), output_uri)
-    
-    logging.info(json.dumps(setup))
-    
+        append_unit0(0, mono_input_uri)
+        append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+        append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
+        # append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
+        append_unit0(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
+        # append_unit0(0, 'http://drobilla.net/plugins/mda/DubDelay')
+        append_unit0(0, 'http://calf.sourceforge.net/plugins/Reverb')
+        append_unit0(0, 'http://plugin.org.uk/swh-plugins/sc4')
+        append_unit0(0, 'http://plugin.org.uk/swh-plugins/amp')
+        append_unit0(0, stereo_output_uri)
+        
+        if False:
+            add_rack(0)
+            add_unit(0, 0, input_uri)
+            setup['racks'][0][0]['connections'].add(0, 'jack#system:capture_1')
+            add_unit(0, 1, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+            add_unit(0, 2, 'http://guitarix.sourceforge.net/plugins/gx_amp_stereo#GUITARIX_ST')
+            add_unit(0, len(setup['racks'][0]), output_uri)
+            
+            add_rack(0)
+            add_unit(0, 0, input_uri)
+            add_unit(0, 1, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+            add_unit(0, 2, 'http://guitarix.sourceforge.net/plugins/gx_amp_stereo#GUITARIX_ST')
+            add_unit(0, 3, 'http://guitarix.sourceforge.net/plugins/gx_voodoo_#_voodoo_')
+            add_unit(0, len(setup['racks'][0]), output_uri)
+            
+            logging.info(json.dumps(setup))
+except KeyError as e:
+    logging.error('KeyError: {}'.format(e))
+except:
+    logging.error('ERRROR!!!!')
+    logging.error('Something unspeakable happened!')
+    traceback.print_exc()
 
 logging.info('starting bottle server...')
 bottle.run(host='0.0.0.0', port='8080', debug=True)
