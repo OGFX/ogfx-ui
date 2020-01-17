@@ -10,6 +10,13 @@ struct cc {
   int m_controller;
 };
 
+/*
+  A small program that switches the stereo input signal to either
+  of two output channel pairs. Which output pair to switch to 
+  depends on the input to the process' stdin: a "0" routes the 
+  signal to outputs 00 and 01 and a "1" routes the signal to 
+  outputs 10 and 11.
+*/
 int main(int argc, char *argv[]) {
   std::string name;
   cc switch_cc;
@@ -19,13 +26,7 @@ int main(int argc, char *argv[]) {
   desc.add_options()
     ("name,n",
      po::value<std::string>(&name)->default_value("jack_switch"),
-     "the jack client name")
-    ("channel",
-     po::value<int>(&switch_cc.m_channel)->default_value(0),
-     "the MIDI channel (0-127)")
-    ("controller",
-     po::value<int>(&switch_cc.m_controller)->default_value(0),
-     "the MIDI CC number (0-127)");
+     "the jack client name");
 
   assert(switch_cc.m_channel >= 0);
   assert(switch_cc.m_controller >= 0);
@@ -46,5 +47,11 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  while (std::cin) {
+    int n;
+    cin >> n;
+    std::cout << "got : " << n << std::endl;
+  }
+  
   jack_client_close(jack_client);
 }
