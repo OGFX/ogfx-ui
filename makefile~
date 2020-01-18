@@ -1,0 +1,6 @@
+.PHONY: clean all
+
+all: lv2lsjson
+
+lv2lsjson: lv2lsjson.cc
+	$(CXX) -o lv2lsjson `pkg-config lilv-0 --cflags --libs`
