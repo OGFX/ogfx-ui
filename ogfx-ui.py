@@ -159,7 +159,7 @@ def manage_subprocesses():
                 if unit['uuid'] not in subprocess_map:
                     subprocess_map[unit['uuid']] = (
                         subprocess.Popen(
-                            ['jalv', '-n', switch_unit_jack_client_name(unit), 'http://moddevices.com/plugins/mod-devel/StereoSwitchBox3'], 
+                            ['./jack_switch', '-n', switch_unit_jack_client_name(unit)], 
                             stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), 
                         subprocess.Popen(
                             ['jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
@@ -181,9 +181,9 @@ def rewire():
             if unit['type'] == 'lv2':
                 # Internal connections:
                 if len(unit['input_audio_ports']) >= 1:
-                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'OUT1L'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
+                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out00'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
                 if len(unit['input_audio_ports']) >= 2:
-                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'OUT1R'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol']))) 
+                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out01'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol']))) 
         for unit_index in range(1, len(units)):
             logging.debug('unit index {}'.format(unit_index))
             unit = units[unit_index]
@@ -191,11 +191,19 @@ def rewire():
             if unit['type'] == 'lv2' and prev_unit['type'] == 'lv2':
                 if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
                     if len(unit['input_audio_ports']) >= 1:
-                        connections.append(('{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'Out2L'), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InL'))) 
-                        connections.append(('{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InL'))) 
+                        connections.append((
+                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out10'),
+                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
+                        connections.append((
+                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
+                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
                     if len(unit['input_audio_ports']) >= 2:
-                        connections.append(('{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'Out2R'), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InR'))) 
-                        connections.append(('{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']), '{}:{}'.format(switch_unit_jack_client_name(unit), 'InR'))) 
+                        connections.append((
+                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out11'),
+                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
+                        connections.append((
+                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
+                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
                 
                 
     
