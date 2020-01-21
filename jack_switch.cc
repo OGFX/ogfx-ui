@@ -5,11 +5,6 @@
 #include <iostream>
 #include <cstdlib>
 
-struct cc {
-  int m_channel;
-  int m_controller;
-};
-
 int channel_switch;
 
 jack_port_t *in0;
