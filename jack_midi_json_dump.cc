@@ -30,7 +30,7 @@ extern "C" {
 }
 
 /*
-  A small program that dumps the midi event stream it
+  A small program that dumps midi cc events it
   gets to stdout as JSON objects (one per line) in the form:
 
   { bytes: [ 76, 23, 11,  ... ] }

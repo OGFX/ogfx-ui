@@ -396,6 +396,14 @@ def resetet():
 def static(filepath):
     return bottle.static_file(filepath, root='static/')
 
+midi_in_quit = False
+def midi_in():
+    global midi_in_quit
+
+
+    
+    while not midi_in_quit:
+        pass
 
 connections_manager_quit = False
 def connections_manager():
