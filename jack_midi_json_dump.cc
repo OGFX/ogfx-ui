@@ -13,9 +13,11 @@ jack_port_t *in0;
 
 jack_ringbuffer_t *ringbuffer;
 
+const size_t message_size = 3;
+
 extern "C" {
   int process(jack_nframes_t nframes, void *arg) {
-    void *in0_buffer = jack_port_get_buffer(in0, nframes);
+    // void *in0_buffer = jack_port_get_buffer(in0, nframes);
 
     jack_nframes_t number_of_events = jack_midi_get_event_count(in0);
 
@@ -23,6 +25,20 @@ extern "C" {
       jack_midi_event_t event;
 
       jack_midi_event_get(&event, in0, event_index);
+
+      if (3 != event.size) {
+	continue;
+      }
+
+      // CC
+      if ((event.buffer[0] & (128 + 32 + 16)) == (128 + 32 + 16)) {
+	jack_ringbuffer_write(ringbuffer, (const char*)event.buffer, 3);
+      }
+
+      // Pitch bend
+      if ((event.buffer[0] & (128 + 64 + 32)) == (128 + 64 + 32)) {
+	jack_ringbuffer_write(ringbuffer, (const char*)event.buffer, 3);
+      }
     }
     
     return 0;
@@ -33,9 +49,11 @@ extern "C" {
   A small program that dumps the midi event stream it
   gets to stdout as JSON objects (one per line) in the form:
 
-  { bytes: [ 76, 23, 11,  ... ] }
+  { bytes: [ 76, 23, 11 ] }
 
-  where bytes are values between 0 and 255.
+  where bytes are values between 0 and 255. Right now this 
+  program is limited to the 3-byte messages control change
+  and pitch bend change.
 */
 int main(int argc, char *argv[]) {
   std::string name;
@@ -80,22 +98,21 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  std::cout << "{ \"bytes\": [";
-  bool first = true;
-  
+
   while(true) {
     usleep(1000);
 
-    size_t available = jack_ringbuffer_read_space(ringbuffer);
-    char data;
+    size_t available;
 
-    for (size_t index = 0; index < available; ++index) {
-      jack_ringbuffer_read(ringbuffer, &data, 1);
-      
-      if (false == first) {
-        std::cout << ", ";
-      }
-      std::cout << data;
+    while((available = jack_ringbuffer_read_space(ringbuffer)) >= 3) {
+      char data[3];
+      jack_ringbuffer_read(ringbuffer, data, 3);
+
+      std::cout
+	<< "{ \"bytes\": [ "
+	<< data[0] << ", " << data[1] << ", " << data[2]
+	<< " ] }"
+	<< std::endl;
     }
   }
   
