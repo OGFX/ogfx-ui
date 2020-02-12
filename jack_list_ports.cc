@@ -16,11 +16,6 @@
 int main(int argc, char *argv[]) {
   std::string name;
 
-  bool input;
-  bool output;
-  bool midi;
-  bool audio;
-  
   namespace po = boost::program_options;
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -29,18 +24,6 @@ int main(int argc, char *argv[]) {
     ("name,n",
      po::value<std::string>(&name)->default_value("jack_list_ports"),
      "the jack client name")
-    ("input,i",
-     po::value<bool>(&input)->default_value(false),
-     "list input ports")
-    ("output,o",
-     po::value<bool>(&output)->default_value(false),
-     "list output ports")
-    ("input,m",
-     po::value<bool>(&midi)->default_value(false),
-     "list MIDI ports")
-    ("audio,a",
-     po::value<bool>(&audio)->default_value(false),
-     "list input ports")
      ;
 
   po::variables_map vm;
@@ -74,9 +57,9 @@ int main(int argc, char *argv[]) {
     std::cout <<
       "{ " <<
       " \"name\": \"" << ports[index] << "\"," << 
-      ", \"type\": \"" << jack_port_type(port) << "\"," << 
+      " \"type\": \"" << jack_port_type(port) << "\"," << 
       " \"input\": " << ((flags & JackPortIsInput) != 0) << "," <<
-      " \"output\": " << ((flags & JackPortIsOutput) != 0) << "," <<
+      " \"output\": " << ((flags & JackPortIsOutput) != 0) <<
       " }";
   }
   std::cout << " ]" << std::endl;
