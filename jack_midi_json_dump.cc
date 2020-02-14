@@ -17,27 +17,26 @@ const size_t message_size = 3;
 
 extern "C" {
   int process(jack_nframes_t nframes, void *arg) {
-    // void *in0_buffer = jack_port_get_buffer(in0, nframes);
+    void *in0_buffer = jack_port_get_buffer(in0, nframes);
 
-    jack_nframes_t number_of_events = jack_midi_get_event_count(in0);
+    jack_nframes_t number_of_events = jack_midi_get_event_count(in0_buffer);
 
     for (jack_nframes_t event_index = 0; event_index < number_of_events; ++event_index) {
       jack_midi_event_t event;
 
-      jack_midi_event_get(&event, in0, event_index);
-
-      if (3 != event.size) {
-	continue;
-      }
+      // std::cout << "event\n";
+      jack_midi_event_get(&event, in0_buffer, event_index);
 
       // CC
       if ((event.buffer[0] & (128 + 32 + 16)) == (128 + 32 + 16)) {
-	jack_ringbuffer_write(ringbuffer, (const char*)event.buffer, 3);
+	// std::cout << "cc\n";
+	jack_ringbuffer_write(ringbuffer, (const char*)event.buffer, message_size);
       }
 
       // Pitch bend
       if ((event.buffer[0] & (128 + 64 + 32)) == (128 + 64 + 32)) {
-	jack_ringbuffer_write(ringbuffer, (const char*)event.buffer, 3);
+	// std::cout << "hmm\n";
+	jack_ringbuffer_write(ringbuffer, (const char*)event.buffer, message_size);
       }
     }
     
@@ -98,19 +97,18 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-
   while(true) {
     usleep(1000);
 
     size_t available;
 
     while((available = jack_ringbuffer_read_space(ringbuffer)) >= 3) {
-      char data[3];
-      jack_ringbuffer_read(ringbuffer, data, 3);
+      char data[message_size];
+      jack_ringbuffer_read(ringbuffer, data, message_size);
 
       std::cout
 	<< "{ \"bytes\": [ "
-	<< data[0] << ", " << data[1] << ", " << data[2]
+	<< (int)((uint8_t)data[0]) << ", " << (int)((uint8_t)data[1]) << ", " << (int)((uint8_t)data[2])
 	<< " ] }"
 	<< std::endl;
     }
