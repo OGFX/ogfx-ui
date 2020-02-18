@@ -204,7 +204,8 @@ def add_unit0(rack_index, unit_index, uri):
     input_control_ports = []
     input_audio_ports = []
     output_audio_ports = []
-    connections = []
+    extra_input_connections = []
+    extra_output_connections = []
     direction = ''
     unit_name = unit['name']
     
@@ -214,10 +215,12 @@ def add_unit0(rack_index, unit_index, uri):
             if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#AudioPort']:
                 logging.debug('input audio port {} {}'.format(port['name'], port['symbol']))
                 input_audio_ports.append({ 'name': port['name'], 'symbol': port['symbol']})
+                extra_input_connections.append([])
 
             if port['http://lv2plug.in/ns/lv2core#OutputPort'] and port['http://lv2plug.in/ns/lv2core#AudioPort']:
                 logging.debug('output audio port {} {}'.format(port['name'], port['symbol']))
                 output_audio_ports.append({ 'name': port['name'], 'symbol': port['symbol']})
+                extra_output_connections.append([])
 
             if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#ControlPort']:
                 logging.debug('input control port {} {}'.format(port['name'], port['symbol']))
@@ -225,7 +228,7 @@ def add_unit0(rack_index, unit_index, uri):
                 input_control_ports.append(control_port)
 
     unit_uuid = str(uuid.uuid4())
-    setup['racks'][rack_index]['units'].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'connections': connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': None })
+    setup['racks'][rack_index]['units'].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'extra_input_connections': extra_input_connections, 'extra_output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': None })
 
     rewire()
 
@@ -385,7 +388,8 @@ try:
         # append_unit0(0, 'http://drobilla.net/plugins/mda/DubDelay')
         append_unit0(0, 'http://calf.sourceforge.net/plugins/Reverb')
         append_unit0(0, 'http://plugin.org.uk/swh-plugins/sc4')
-        append_unit0(0, 'http://plugin.org.uk/swh-plugins/amp')
+
+        setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_1')
         
         if False:
             add_rack(0)
