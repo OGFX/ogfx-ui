@@ -19,6 +19,8 @@ import time
 import sys
 import traceback
 
+import ogfx
+
 arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
 arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=4)
 arguments_parser.add_argument('--setup', dest='setup', action='store', help='A file containing a setup to load at startup')
@@ -42,38 +44,13 @@ if not os.path.exists(setups_path):
 logging.info('using setups path {}'.format(setups_path))
 default_setup_file_path = os.path.join(setups_path, 'default_setup.json')
 
-units_map = dict()
-
-logging.info('registering special units...')
-special_units = dict()
-
-unit_type_lv2 = 'lv2'
-unit_type_special = 'special'
-
 logging.info('scanning for lv2 plugins...')
 lv2_world_json_string = subprocess.check_output(['./lv2lsjson'])
 lv2_world = json.loads(lv2_world_json_string)
 logging.info('number of plugins: {}'.format(len(lv2_world)))
 
-logging.info('registering lv2 plugins...')
-for p in lv2_world:
-    # logging.info(str(p.get_uri()))
-    logging.debug('{} ({})'.format(p['name'], p['uri']))
-    units_map[p['uri']] = {'type': 'lv2', 'name': p['name'], 'data': p }
 
-logging.info('creating subprocess map...')
-
-subprocess_map = dict()
-connections = []
-
-
-def create_setup():
-    return {'name': 'new setup', 'racks': [] }
-
-
-logging.info('creating setup...')
-setup = create_setup()
-
+og = ogfx.ogfx(lv2_world)
 
 # WIRING
 def unit_in_setup(unit_uuid):
