@@ -2,6 +2,7 @@ import logging
 import subprocess
 import json
 import uuid
+import time
 import threading
 
 def unit_jack_client_name(unit):
@@ -26,14 +27,16 @@ class ogfx:
 
     def connections_manager(self):
         while not self.quit_threads:
-            # logging.info('managing connections...')
+            time.sleep(1)
+            continue
+            logging.debug('managing connections...')
             for connection in self.connections:
                 try:
+                    logging.debug('connecting {} {}'.format(connection[0], connection[1]))
                     # jack_client.connect(connection[0], connection[1])
                     subprocess.check_call(['jack_connect', connection[0], connection[1]])
                 except:
                     pass
-                time.sleep(1)
         
     def start_threads(self):
         logging.info('running connections manager thread...')
@@ -108,9 +111,16 @@ class ogfx:
         
     def append_unit(self, rack_index, uri):
         self.add_unit(rack_index, len(self.setup['racks'][rack_index]['units']), uri)
+        # add_unit calls rewire()
 
+    def rewire_port_with_prefix_exists(self, s):
+        ports_json_string = subprocess.check_output(['./jack_list_ports'])
+        ports = json.loads(ports_json_string)
+        for port in ports:
+            if port['name'].find(s) == 0:
+                return True
         
-    def remove_leftover_subprocesses(self,):
+    def rewire_remove_leftover_subprocesses(self):
         for unit_uuid in list(self.subprocess_map.keys()):
             if not self.unit_in_setup(unit_uuid):
                 logging.info('removing unit {}'.format(unit_uuid))
@@ -121,7 +131,7 @@ class ogfx:
                     process.wait()
                 del self.subprocess_map[unit_uuid]
 
-    def manage_subprocesses(self):
+    def rewire_manage_subprocesses(self):
         for rack in self.setup['racks']:
             # First let's do the process management
             for unit in rack['units']:
@@ -131,43 +141,72 @@ class ogfx:
                             ['./jack_switch', '-n', switch_unit_jack_client_name(unit)], 
                             stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), 
                         subprocess.Popen(
-                            ['jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
-        self.remove_leftover_subprocesses()
+                            ['stdbuf', '-i0', '-o0', '-e0', 'jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
+                    while not self.rewire_port_with_prefix_exists(switch_unit_jack_client_name(unit)):
+                        time.sleep(0.01)
+                    while not self.rewire_port_with_prefix_exists(unit_jack_client_name(unit)):
+                        time.sleep(0.01)
+                        
+        self.rewire_remove_leftover_subprocesses()
 
+
+    def connect(self, port1, port2):
+        try:
+            logging.debug('connecting {} -> {}'.format(port1, port2))
+            subprocess.check_call(['jack_connect', port1, port2])
+        except:
+            logging.debug('failed to connect {} -> {}'.format(port1, port2))
+            
+    def disconnect(self, port1, port2):
+        try:
+            logging.debug('discconnecting {} -> {}'.format(port1, port2))
+            subprocess.check_call(['jack_disconnect', port1, port2])
+        except:
+            logging.debug('failed to disconnect {} -> {}'.format(port1, port2))
+    
+    def rewire_update_connections(self, old_connections, new_connections):
+        for connection in new_connections:
+            if not connection in old_connections:
+                self.connect(connection[0], connection[1])
+        for connection in old_connections:
+            if not connection in new_connections:
+                self.disconnect(connection[0], connection[1])
+        
     def rewire(self):
-        logging.info('rewire')
-        self.manage_subprocesses()
-        connections = []
+        logging.info('rewire...')
+        self.rewire_manage_subprocesses()
+        old_connections = self.connections
+        self.connections = []
         for rack in self.setup['racks']:
+            logging.debug('rewiring rack...')
             units = rack['units']
             for unit_index in range(0, len(units)):
                 unit = units[unit_index]
                 # Internal connections:
                 if len(unit['input_audio_ports']) >= 1:
-                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out00'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
+                    self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out00'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
                 if len(unit['input_audio_ports']) >= 2:
-                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out01'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol']))) 
+                    self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out01'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol']))) 
             for unit_index in range(1, len(units)):
                 logging.debug('unit index {}'.format(unit_index))
                 unit = units[unit_index]
                 prev_unit = units[unit_index - 1]
                 if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
                     if len(unit['input_audio_ports']) >= 1:
-                        connections.append((
+                        self.connections.append((
                             '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out10'),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                        connections.append((
+                        self.connections.append((
                             '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
                     if len(unit['input_audio_ports']) >= 2:
-                        connections.append((
+                        self.connections.append((
                             '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out11'),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                        connections.append((
+                        self.connections.append((
                             '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-
-
+        self.rewire_update_connections(old_connections, self.connections)
 
 
 

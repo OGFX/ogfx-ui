@@ -53,10 +53,6 @@ logging.info('number of plugins: {}'.format(len(lv2_world)))
 og = ogfx.ogfx(lv2_world)
 og.start_threads()
 
-# WIRING
-
-ports = []
-
 logging.info('setting up routes...')
 @bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>/<port_index:int>')
 def connect2(rack_index, unit_index, channel_index, port_index):
@@ -87,7 +83,6 @@ def disconnect(rack_index, unit_index, channel_index, connection_index):
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 # UNITS 
-
 
 @bottle.route('/add/<rack_index:int>/<unit_index:int>/<uri>')
 def add_unit(rack_index, unit_index, uri):
@@ -214,22 +209,6 @@ try:
 
         og.setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_1')
         
-        if False:
-            add_rack(0)
-            add_unit(0, 0, input_uri)
-            setup['racks'][0][0]['connections'].add(0, 'jack#system:capture_1')
-            add_unit(0, 1, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-            add_unit(0, 2, 'http://guitarix.sourceforge.net/plugins/gx_amp_stereo#GUITARIX_ST')
-            add_unit(0, len(setup['racks'][0]), output_uri)
-            
-            add_rack(0)
-            add_unit(0, 0, input_uri)
-            add_unit(0, 1, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-            add_unit(0, 2, 'http://guitarix.sourceforge.net/plugins/gx_amp_stereo#GUITARIX_ST')
-            add_unit(0, 3, 'http://guitarix.sourceforge.net/plugins/gx_voodoo_#_voodoo_')
-            add_unit(0, len(setup['racks'][0]), output_uri)
-            
-            logging.info(json.dumps(setup))
 except KeyError as e:
     logging.error('KeyError: {}'.format(e))
 except:
@@ -240,7 +219,7 @@ except:
 logging.info('starting bottle server...')
 bottle.run(host='0.0.0.0', port='8080', debug=True)
 
-logging.info('shutting down...')
+logging.info('stopping threads...')
 og.stop_threads()
 logging.info('clearing setup...')
 og.create_setup()
