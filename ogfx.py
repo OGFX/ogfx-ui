@@ -4,6 +4,7 @@ import json
 import uuid
 import time
 import threading
+import traceback
 
 def unit_jack_client_name(unit):
     return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
@@ -108,7 +109,19 @@ class ogfx:
         self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'extra_input_connections': extra_input_connections, 'extra_output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': None })
 
         self.rewire()
-        
+
+    def set_port_value(self, rack_index, unit_index, port_index, value):
+        unit = self.setup['racks'][0]['units'][unit_index]
+        try:
+            process = self.subprocess_map[unit['uuid']][1]
+            symbol = unit['input_control_ports'][port_index]['symbol']
+            logging.debug('setting {} to value {}...'.format(symbol, value))
+            process.stdin.write('{} = {}\n'.format(symbol, value).encode('utf-8'))
+            process.stdin.flush()
+        except:
+            logging.error('failed to set port value...')
+            traceback.print_exc()
+    
     def append_unit(self, rack_index, uri):
         self.add_unit(rack_index, len(self.setup['racks'][rack_index]['units']), uri)
         # add_unit calls rewire()

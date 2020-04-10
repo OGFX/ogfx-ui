@@ -205,7 +205,10 @@ try:
         # append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
         # og.append_unit(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
         og.append_unit(0, 'http://drobilla.net/plugins/mda/DubDelay')
+        og.set_port_value(0, 1, 0, 0.2)
+
         og.append_unit(0, 'http://calf.sourceforge.net/plugins/Reverb')
+        
         og.setup['racks'][0]['units'][1]['extra_input_connections'][0].append('system:capture_2')
 
 
