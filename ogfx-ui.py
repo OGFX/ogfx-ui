@@ -200,17 +200,18 @@ try:
         og.add_rack(0)
     
         og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-        og.setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_1')
         
-        og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
+        # og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
         # append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
-        og.append_unit(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
-        # append_unit0(0, 'http://drobilla.net/plugins/mda/DubDelay')
+        # og.append_unit(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
+        og.append_unit(0, 'http://drobilla.net/plugins/mda/DubDelay')
         og.append_unit(0, 'http://calf.sourceforge.net/plugins/Reverb')
-        og.append_unit(0, 'http://plugin.org.uk/swh-plugins/sc4')
+        og.setup['racks'][0]['units'][1]['extra_input_connections'][0].append('system:capture_2')
 
-        og.setup['racks'][0]['units'][4]['extra_output_connections'][0].append('system:playback_1')
-        og.setup['racks'][0]['units'][4]['extra_output_connections'][1].append('system:playback_2')
+
+        og.append_unit(0, 'http://plugin.org.uk/swh-plugins/sc4')
+        og.setup['racks'][0]['units'][-1]['extra_output_connections'][0].append('system:playback_1')
+        og.setup['racks'][0]['units'][-1]['extra_output_connections'][1].append('system:playback_2')
         
         og.rewire()
         

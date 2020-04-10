@@ -126,7 +126,7 @@ class ogfx:
                 logging.info('removing unit {}'.format(unit_uuid))
                 for process in self.subprocess_map[unit_uuid]:
                     process.stdin.close()
-                    process.terminate()
+                    # process.terminate()
                     # FIXME Make sure the wait time is bounded!
                     process.wait()
                 del self.subprocess_map[unit_uuid]
