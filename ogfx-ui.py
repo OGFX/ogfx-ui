@@ -136,17 +136,17 @@ def delete_rack(rack_index):
 @bottle.route('/download')
 def download_setup():
     bottle.response.content_type = 'text/json'
-    return json.dumps(setup, indent=2)
+    return json.dumps(og.setup, indent=2)
 
 @bottle.route('/download/<rack_index:int>')
 def download_rack(rack_index):
     bottle.response.content_type = 'text/json'
-    return json.dumps(setup['racks'][rack_index], indent=2)
+    return json.dumps(og.setup['racks'][rack_index], indent=2)
 
 @bottle.route('/download/<rack_index:int>/<unit_index:int>')
 def download_rack(rack_index, unit_index):
     bottle.response.content_type = 'text/json'
-    return json.dumps(setup['racks'][rack_index]['units'][unit_index], indent=2)
+    return json.dumps(og.setup['racks'][rack_index]['units'][unit_index], indent=2)
 
 
 # UPLOADS
@@ -200,6 +200,8 @@ try:
         og.add_rack(0)
     
         og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+        og.setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_1')
+        
         og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
         # append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
         og.append_unit(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
@@ -207,7 +209,10 @@ try:
         og.append_unit(0, 'http://calf.sourceforge.net/plugins/Reverb')
         og.append_unit(0, 'http://plugin.org.uk/swh-plugins/sc4')
 
-        og.setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_1')
+        og.setup['racks'][0]['units'][4]['extra_output_connections'][0].append('system:playback_1')
+        og.setup['racks'][0]['units'][4]['extra_output_connections'][1].append('system:playback_2')
+        
+        og.rewire()
         
 except KeyError as e:
     logging.error('KeyError: {}'.format(e))

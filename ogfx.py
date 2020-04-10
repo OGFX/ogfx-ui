@@ -180,13 +180,35 @@ class ogfx:
         for rack in self.setup['racks']:
             logging.debug('rewiring rack...')
             units = rack['units']
+            logging.debug('internal and extra connections...')
             for unit_index in range(0, len(units)):
                 unit = units[unit_index]
+                logging.debug('connections for unit {}'.format(unit['name']))
+                # Extra connections
+                port_index = 0
+                for port in unit['extra_input_connections']:
+                    # logging.debug(port)
+                    for connection in port:
+                        c = [connection, '{}:{}'.format(switch_unit_jack_client_name(unit), 'in{}'.format(port_index))]
+                        logging.debug(c)
+                        self.connections.append(c)
+                    port_index += 1
+                    
+                port_index = 0
+                for port in unit['extra_output_connections']:
+                    for connection in port:
+                        c = ['{}:{}'.format(unit_jack_client_name(unit), unit['output_audio_ports'][port_index]['symbol']), connection]
+                        logging.debug(c)
+                        self.connections.append(c)
+                    port_index += 1
+                    
                 # Internal connections:
                 if len(unit['input_audio_ports']) >= 1:
                     self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out00'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
                 if len(unit['input_audio_ports']) >= 2:
-                    self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out01'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol']))) 
+                    self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out01'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
+
+            logging.debug('linear connections...')
             for unit_index in range(1, len(units)):
                 logging.debug('unit index {}'.format(unit_index))
                 unit = units[unit_index]
