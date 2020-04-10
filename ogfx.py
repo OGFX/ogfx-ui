@@ -2,6 +2,7 @@ import logging
 import subprocess
 import json
 import uuid
+import threading
 
 def unit_jack_client_name(unit):
     return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
@@ -36,11 +37,11 @@ class ogfx:
         
     def start_threads(self):
         logging.info('running connections manager thread...')
-        self.connections_manager_thread = threading.Thread(None, connections_manager)
-        connections_manager_thread.start()
+        self.connections_manager_thread = threading.Thread(None, self.connections_manager)
+        self.connections_manager_thread.start()
 
     def stop_threads(self):
-        pass
+        self.quit_threads = True
 
     def create_units_map(self):
         self.units_map = dict()
@@ -52,7 +53,7 @@ class ogfx:
 
         
     def create_setup(self):
-        logging.info("creating setup...")
+        logging.info("creating (empty default) setup...")
         self.setup = {'name': 'new setup', 'racks': [] }
         self.rewire()
 

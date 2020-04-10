@@ -51,6 +51,7 @@ logging.info('number of plugins: {}'.format(len(lv2_world)))
 
 
 og = ogfx.ogfx(lv2_world)
+og.start_threads()
 
 # WIRING
 
@@ -240,6 +241,7 @@ logging.info('starting bottle server...')
 bottle.run(host='0.0.0.0', port='8080', debug=True)
 
 logging.info('shutting down...')
-
 og.stop_threads()
-
+logging.info('clearing setup...')
+og.create_setup()
+logging.info('exiting...')
