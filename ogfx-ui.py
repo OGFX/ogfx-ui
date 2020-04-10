@@ -53,93 +53,6 @@ logging.info('number of plugins: {}'.format(len(lv2_world)))
 og = ogfx.ogfx(lv2_world)
 
 # WIRING
-def unit_in_setup(unit_uuid):
-    global setup
-    global subprocess_map
-    for rack in setup['racks']:
-        for unit in rack['units']:
-            if unit['uuid'] == unit_uuid:
-                return True
-    return False
-
-def remove_leftover_subprocesses():
-    global subprocess_map
-    global setup
-    for unit_uuid in list(subprocess_map.keys()):
-        if not unit_in_setup(unit_uuid):
-            logging.info('removing unit {}'.format(unit_uuid))
-            for process in subprocess_map[unit_uuid]:
-                process.stdin.close()
-                process.terminate()
-                # FIXME Make sure the wait time is bounded!
-                process.wait()
-            del subprocess_map[unit_uuid]
-
-def unit_jack_client_name(unit):
-    return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
-
-def switch_unit_jack_client_name(unit):
-    return '{}-{}'.format(unit['uuid'][0:8], 'switch')
-
-def manage_subprocesses():
-    global setup
-    global subprocess_map
-    
-    for rack in setup['racks']:
-        # First let's do the process management
-        for unit in rack['units']:
-            if unit['type'] == 'lv2':
-                if unit['uuid'] not in subprocess_map:
-                    subprocess_map[unit['uuid']] = (
-                        subprocess.Popen(
-                            ['./jack_switch', '-n', switch_unit_jack_client_name(unit)], 
-                            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), 
-                        subprocess.Popen(
-                            ['jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
-            if unit['type'] == 'special':
-                pass
-    
-    remove_leftover_subprocesses()
-
-def rewire():
-    logging.info('rewire')
-    global setup
-    manage_subprocesses()
-    global connections
-    connections = []
-    for rack in setup['racks']:
-        units = rack['units']
-        for unit_index in range(0, len(units)):
-            unit = units[unit_index]
-            if unit['type'] == 'lv2':
-                # Internal connections:
-                if len(unit['input_audio_ports']) >= 1:
-                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out00'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
-                if len(unit['input_audio_ports']) >= 2:
-                    connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out01'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol']))) 
-        for unit_index in range(1, len(units)):
-            logging.debug('unit index {}'.format(unit_index))
-            unit = units[unit_index]
-            prev_unit = units[unit_index - 1]
-            if unit['type'] == 'lv2' and prev_unit['type'] == 'lv2':
-                if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
-                    if len(unit['input_audio_ports']) >= 1:
-                        connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out10'),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                        connections.append((
-                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                    if len(unit['input_audio_ports']) >= 2:
-                        connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out11'),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                        connections.append((
-                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                
-                
-    
 
 ports = []
 
@@ -174,43 +87,6 @@ def disconnect(rack_index, unit_index, channel_index, connection_index):
 
 # UNITS 
 
-def add_unit0(rack_index, unit_index, uri):
-    logging.info('adding unit {}:{} uri {}'.format(rack_index, unit_index, uri))
-    unit = units_map[uri]
-    unit_type = unit['type']
-    input_control_ports = []
-    input_audio_ports = []
-    output_audio_ports = []
-    extra_input_connections = []
-    extra_output_connections = []
-    direction = ''
-    unit_name = unit['name']
-    
-    if unit_type == unit_type_lv2:
-        for port_index in range(len(unit['data']['ports'])):
-            port = unit['data']['ports'][port_index]
-            if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#AudioPort']:
-                logging.debug('input audio port {} {}'.format(port['name'], port['symbol']))
-                input_audio_ports.append({ 'name': port['name'], 'symbol': port['symbol']})
-                extra_input_connections.append([])
-
-            if port['http://lv2plug.in/ns/lv2core#OutputPort'] and port['http://lv2plug.in/ns/lv2core#AudioPort']:
-                logging.debug('output audio port {} {}'.format(port['name'], port['symbol']))
-                output_audio_ports.append({ 'name': port['name'], 'symbol': port['symbol']})
-                extra_output_connections.append([])
-
-            if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#ControlPort']:
-                logging.debug('input control port {} {}'.format(port['name'], port['symbol']))
-                control_port = { 'name': port['name'], 'symbol': port['symbol'], 'range': port['range'], 'value': port['range'][0], 'cc': None }
-                input_control_ports.append(control_port)
-
-    unit_uuid = str(uuid.uuid4())
-    setup['racks'][rack_index]['units'].insert(unit_index, {'type': unit_type, 'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'extra_input_connections': extra_input_connections, 'extra_output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': None })
-
-    rewire()
-
-def append_unit0(rack_index, uri):
-    add_unit0(rack_index, len(setup['racks'][rack_index]['units']), uri)
 
 @bottle.route('/add/<rack_index:int>/<unit_index:int>/<uri>')
 def add_unit(rack_index, unit_index, uri):
@@ -219,14 +95,14 @@ def add_unit(rack_index, unit_index, uri):
 
 @bottle.route('/add2/<rack_index:int>/<unit_index:int>/<units_map_index:int>')
 def add_unit2(rack_index, unit_index, units_map_index):
-    keys_list = list(units_map)
-    add_unit0(rack_index, unit_index, keys_list[units_map_index])
+    keys_list = list(og.units_map)
+    og.add_unit(rack_index, unit_index, keys_list[units_map_index])
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 @bottle.route('/add/<rack_index:int>/<unit_index:int>')
 @bottle.view('add_unit')
 def add_unit(rack_index, unit_index):
-    return dict({'units': units_map, 'remaining_path': '/{}/{}'.format(rack_index, unit_index)})
+    return dict({'units': og.units_map, 'remaining_path': '/{}/{}'.format(rack_index, unit_index)})
 
 def delete_unit0(rack_index, unit_index):
     global setup
@@ -248,21 +124,14 @@ def delete_unit(rack_index, unit_index):
 
 # RACKS
 
-def add_rack0(rack_index):
-    global setup
-    setup['racks'].insert(int(rack_index), {'enabled': True, 'units': [], 'cc': None})
-    rewire()
-
-@bottle.route('/add/<rack_index>')
+@bottle.route('/add/<rack_index:int>')
 def add_rack(rack_index):
-    add_rack0(rack_index)
+    og.add_rack(rack_index)
     bottle.redirect('/#rack-{}'.format(rack_index))
 
-@bottle.route('/delete/<rack_index>')
+@bottle.route('/delete/<rack_index:int>')
 def delete_rack(rack_index):
-    global setup
-    del setup['racks'][int(rack_index)]
-    rewire()
+    og.delete_rack(rack_index)
     bottle.redirect('/')
     
 
@@ -308,17 +177,11 @@ def upload_setup():
 @bottle.view('index')
 def index():
     global setup
-    return dict({'setup': setup})
-
-
-def resetet0():
-    global setup
-    setup = create_setup()
-    rewire()
+    return dict({'setup': og.setup})
 
 @bottle.route('/reset')
 def resetet():
-    resetet0()
+    og.create_setup()
     bottle.redirect('/')
 
 
@@ -329,44 +192,26 @@ def static(filepath):
 midi_in_quit = False
 def midi_in():
     global midi_in_quit
-
-
     
     while not midi_in_quit:
+        time.sleep(0.01)
         pass
-
-connections_manager_quit = False
-def connections_manager():
-    global connections_manager_quit
-    while not connections_manager_quit:
-        # logging.info('managing connections...')
-        for connection in connections:
-            try:
-                # jack_client.connect(connection[0], connection[1])
-                subprocess.check_call(['jack_connect', connection[0], connection[1]])
-            except:
-                pass
-        time.sleep(1)
-
-logging.info('running connections manager thread...')
-connections_manager_thread = threading.Thread(None, connections_manager)
-connections_manager_thread.start()
 
 try:
     if True:
         logging.info('adding example data...')
         
-        add_rack0(0)
+        og.add_rack(0)
     
-        append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-        append_unit0(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
+        og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+        og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
         # append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
-        append_unit0(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
+        og.append_unit(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
         # append_unit0(0, 'http://drobilla.net/plugins/mda/DubDelay')
-        append_unit0(0, 'http://calf.sourceforge.net/plugins/Reverb')
-        append_unit0(0, 'http://plugin.org.uk/swh-plugins/sc4')
+        og.append_unit(0, 'http://calf.sourceforge.net/plugins/Reverb')
+        og.append_unit(0, 'http://plugin.org.uk/swh-plugins/sc4')
 
-        setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_1')
+        og.setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_1')
         
         if False:
             add_rack(0)
@@ -396,7 +241,5 @@ bottle.run(host='0.0.0.0', port='8080', debug=True)
 
 logging.info('shutting down...')
 
-connections_manager_quit = True
-setup = create_setup()
-rewire()
+og.stop_threads()
 

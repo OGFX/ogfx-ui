@@ -82,23 +82,21 @@
                     </div>
                 </div>
                 <div class="connections-info">
-                    % if unit['type'] == 'special':
-                        % channel_index = 0
-                        % for channel in unit['connections']:
-                            <span>channel-{{channel_index}}:</span>
-                            % connection_index = 0
-                            % for connection in channel:
-                                <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/{{channel_index}}/{{connection_index}}">disconnect</a></div>
-                                % connection_index = connection_index + 1
-                            % end
-                            % if unit['direction'] == 'input':
-                                <div><a class="operations" href="connect/{{rack_index}}/{{unit_index}}/{{channel_index}}/input">connect</a></div>
-                            % else:
-                                <div><a class="operations" href="connect/{{rack_index}}/{{unit_index}}/{{channel_index}}/output">connect</a></div>
-                            % end
-                            % channel_index = channel_index + 1
-                        % end
+                  % channel_index = 0
+                  % for channel in unit['extra_input_connections']:
+                    <span>channel-{{channel_index}}:</span>
+                    % connection_index = 0
+                    % for connection in channel:
+                      <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/{{channel_index}}/{{connection_index}}">disconnect</a></div>
+                      % connection_index = connection_index + 1
                     % end
+                    % if unit['direction'] == 'input':
+                      <div><a class="operations" href="connect/{{rack_index}}/{{unit_index}}/{{channel_index}}/input">connect</a></div>
+                    % else:
+                      <div><a class="operations" href="connect/{{rack_index}}/{{unit_index}}/{{channel_index}}/output">connect</a></div>
+                    % end
+                    % channel_index = channel_index + 1
+                  % end
                 </div>
                 <div class="port-info">
                     % port_index = 0
