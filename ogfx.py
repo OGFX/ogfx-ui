@@ -111,11 +111,12 @@ class ogfx:
         self.rewire()
 
     def set_port_value(self, rack_index, unit_index, port_index, value):
-        unit = self.setup['racks'][0]['units'][unit_index]
+        unit = self.setup['racks'][rack_index]['units'][unit_index]
         try:
             process = self.subprocess_map[unit['uuid']][1]
             symbol = unit['input_control_ports'][port_index]['symbol']
             logging.debug('setting {} to value {}...'.format(symbol, value))
+            unit['input_control_ports'][port_index]['value'] = value
             process.stdin.write('{} = {}\n'.format(symbol, value).encode('utf-8'))
             process.stdin.flush()
         except:
@@ -145,10 +146,12 @@ class ogfx:
                 del self.subprocess_map[unit_uuid]
 
     def rewire_manage_subprocesses(self):
+        logging.debug('managing subprocesses...')
         for rack in self.setup['racks']:
             # First let's do the process management
             for unit in rack['units']:
                 if unit['uuid'] not in self.subprocess_map:
+                    logging.debug('starting subprocess...')
                     self.subprocess_map[unit['uuid']] = (
                         subprocess.Popen(
                             ['./jack_switch', '-n', switch_unit_jack_client_name(unit)], 
@@ -240,7 +243,24 @@ class ogfx:
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
                         self.connections.append((
                             '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
+                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1')))
+                else:
+                    if (len(unit['input_audio_ports']) >= 2) and (len(prev_unit['output_audio_ports']) == 1):
+                        self.connections.append((
+                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out10'),
+                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
+                        self.connections.append((
+                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out10'),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
+                        self.connections.append((
+                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
+                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
+                        self.connections.append((
+                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
+                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
+                        
+                    
+                        
         self.rewire_update_connections(old_connections, self.connections)
 
 

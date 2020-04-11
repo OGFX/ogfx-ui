@@ -32,6 +32,7 @@
 </div>
 
 <div id="racks">
+  <form action="/" method="post">
     <div class="add-rack">
         <a href="add/0">add rack</a>
     </div>
@@ -42,7 +43,7 @@
                 <span>{{rack_index}}._._:</span>
                  <a href="/cc/{{rack_index}}">cc</a>
                  <span>--:--</span>
-                <input type="checkbox" checked="{{rack['enabled']}}">
+                <input type="checkbox" checked="{{rack['enabled']}}" id="rack_enabled_{{rack_index}}">
                 <span>rack-{{rack_index}}</span>
                 <div class="operations">
                     <a href="moveup/{{rack_index}}">▲</a> 
@@ -107,8 +108,8 @@
                             <span>--:--:lin</span>
                             <span>{{port['name']}}</span>
                             <div class="control-input-container">
-                                <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off">
-                                <input class="input-control-port-value-text" type="text" inputmode="decimal" value="{{port['value']}}" autocomplete="off" size="5">
+                                <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off" name="input_control_port_value_slider-{{rack_index}}_{{unit_index}}_{{port_index}}">
+                                <input class="input-control-port-value-text" type="text" inputmode="decimal" value="{{port['value']}}" autocomplete="off" size="5" name="input_control_port_value_text-{{rack_index}}_{{unit_index}}_{{port_index}}">
                             </div>
                         </div>
                         % port_index = port_index + 1
@@ -143,6 +144,9 @@
             <a href="add/{{rack_index}}">add rack</a>
         </div>
     % end
+    <input type="submit" value="submit">
+  </form>
+
 </div>
 
 </body>

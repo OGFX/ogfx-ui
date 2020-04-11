@@ -168,6 +168,10 @@ def upload_setup():
     return dict({'remaining_path': ''})
     
 
+@bottle.route('/', method='POST')
+@bottle.view('index')
+def index_post():
+    bottle.redirect('/')
 
 @bottle.route('/')
 @bottle.view('index')
@@ -200,16 +204,17 @@ try:
         og.add_rack(0)
     
         og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
+        og.set_port_value(0, 0, 0, 0)
         
-        # og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
+        og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
         # append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
         # og.append_unit(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
         og.append_unit(0, 'http://drobilla.net/plugins/mda/DubDelay')
-        og.set_port_value(0, 1, 0, 0.2)
+        og.set_port_value(0, 2, 0, 0.2)
 
         og.append_unit(0, 'http://calf.sourceforge.net/plugins/Reverb')
         
-        og.setup['racks'][0]['units'][1]['extra_input_connections'][0].append('system:capture_2')
+        og.setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_2')
 
 
         og.append_unit(0, 'http://plugin.org.uk/swh-plugins/sc4')
