@@ -110,6 +110,11 @@ class ogfx:
 
         self.rewire()
 
+    def delete_unit(self, rack_index, unit_index):
+        unit = self.setup['racks'][rack_index]['units'][unit_index]
+        del self.setup['racks'][rack_index]['units'][unit_index]
+        self.rewire()
+
     def set_port_value(self, rack_index, unit_index, port_index, value):
         unit = self.setup['racks'][rack_index]['units'][unit_index]
         try:

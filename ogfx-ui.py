@@ -100,21 +100,9 @@ def add_unit2(rack_index, unit_index, units_map_index):
 def add_unit(rack_index, unit_index):
     return dict({'units': og.units_map, 'remaining_path': '/{}/{}'.format(rack_index, unit_index)})
 
-def delete_unit0(rack_index, unit_index):
-    global setup
-    unit = setup['racks'][rack_index]['units'][unit_index]
-    #if unit['type'] == 'special':
-    #    pass
-    #else:
-    #    subprocess_map[unit['uuid']].stdin.close()
-    #    del subprocess_map[unit['uuid']]
-    del setup['racks'][rack_index]['units'][unit_index]
-    rewire()
-
 @bottle.route('/delete/<rack_index:int>/<unit_index:int>')
 def delete_unit(rack_index, unit_index):
-    global setup
-    delete_unit0(rack_index, unit_index)
+    og.delete_unit(rack_index, unit_index)
     bottle.redirect('/#rack-{}'.format(rack_index))
 
 
@@ -169,7 +157,6 @@ def upload_setup():
     
 
 @bottle.route('/', method='POST')
-@bottle.view('index')
 def index_post():
     bottle.redirect('/')
 
