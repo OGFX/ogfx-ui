@@ -121,13 +121,25 @@ class ogfx:
             process = self.subprocess_map[unit['uuid']][1]
             symbol = unit['input_control_ports'][port_index]['symbol']
             logging.debug('setting {} to value {}...'.format(symbol, value))
-            unit['input_control_ports'][port_index]['value'] = value
             process.stdin.write('{} = {}\n'.format(symbol, value).encode('utf-8'))
             process.stdin.flush()
+            unit['input_control_ports'][port_index]['value'] = value
         except:
             logging.error('failed to set port value...')
             traceback.print_exc()
-    
+
+    def toggle_unit_active(self, rack_index, unit_index, active):
+        logging.debug('setting unit active: {} {} -> {}'.format(rack_index, unit_index, active))
+        unit = self.setup['racks'][rack_index]['units'][unit_index]
+        process = self.subprocess_map[unit['uuid']][0]
+        process.stdin.write('{}\n'.format(active).encode('utf-8'))
+        process.stdin.flush()
+        unit['enabled'] = bool(active)
+        
+
+    def toggle_rack_active(self, rack_index, active):
+        pass
+            
     def append_unit(self, rack_index, uri):
         self.add_unit(rack_index, len(self.setup['racks'][rack_index]['units']), uri)
         # add_unit calls rewire()
@@ -159,10 +171,10 @@ class ogfx:
                     logging.debug('starting subprocess...')
                     self.subprocess_map[unit['uuid']] = (
                         subprocess.Popen(
-                            ['./jack_switch', '-n', switch_unit_jack_client_name(unit)], 
-                            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), 
+                            ['stdbuf', '-i0', '-o0', '-e0', './jack_switch', '-n', switch_unit_jack_client_name(unit)], 
+                            stdin=subprocess.PIPE), 
                         subprocess.Popen(
-                            ['stdbuf', '-i0', '-o0', '-e0', 'jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
+                            ['stdbuf', '-i0', '-o0', '-e0', 'jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE))
                     while not self.rewire_port_with_prefix_exists(switch_unit_jack_client_name(unit)):
                         time.sleep(0.01)
                     while not self.rewire_port_with_prefix_exists(unit_jack_client_name(unit)):

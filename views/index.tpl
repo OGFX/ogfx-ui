@@ -67,7 +67,7 @@
                     <span>{{rack_index}}.{{unit_index}}._:</span>
                      <a href="/cc/{{rack_index}}/{{unit_index}}">cc</a>
                      <span>--:--</span>
-                    <input type="checkbox" checked="{{unit['enabled']}}" name="unit_enabled_{{rack_index}}_{{unit_index}}">
+                    <input type="checkbox" {{'checked' if unit['enabled'] else ''}} name="unit_enabled_{{rack_index}}_{{unit_index}}">
                     <span>{{len(unit['input_audio_ports'])}}:{{len(unit['output_audio_ports'])}}</span>
                     <span>{{unit['name']}}</span>
                     <div class="operations">

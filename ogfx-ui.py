@@ -86,7 +86,7 @@ def disconnect(rack_index, unit_index, channel_index, connection_index):
 
 @bottle.route('/add/<rack_index:int>/<unit_index:int>/<uri>')
 def add_unit(rack_index, unit_index, uri):
-    add_unit0(rack_index, unit_index, uri)
+    og.add_unit(rack_index, unit_index, uri)
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 @bottle.route('/add2/<rack_index:int>/<unit_index:int>/<units_map_index:int>')
@@ -154,16 +154,39 @@ def upload_setup2():
 @bottle.view('upload')
 def upload_setup():
     return dict({'remaining_path': ''})
-    
+
+
+def checkbox_to_int(value):
+    if value == 'on':
+        return 1
+    else:
+        return 0
 
 @bottle.route('/', method='POST')
 def index_post():
+    rack_index = 0
+    for rack in og.setup['racks']:
+        param_name = 'rack_enabled_{}'.format(rack_index)
+        logging.debug(param_name)
+        og.toggle_rack_active(rack_index, checkbox_to_int(bottle.request.forms.get(param_name)))
+        unit_index = 0
+        for unit in rack['units']:
+            param_name = 'unit_enabled_{}_{}'.format(rack_index, unit_index)
+            logging.debug(param_name)
+            og.toggle_unit_active(rack_index, unit_index, checkbox_to_int(bottle.request.forms.get(param_name)))
+            port_index = 0
+            for port in unit['input_control_ports']:
+                param_name = 'input_control_port_value_text_{}_{}_{}'.format(rack_index, unit_index, port_index)
+                logging.debug('port value for: {} {} {} - {}'.format(rack_index, unit_index, port_index, param_name ))
+                og.set_port_value(rack_index, unit_index, port_index, float(bottle.request.forms.get(param_name)))
+                port_index += 1
+            unit_index += 1
+        rack_index += 1
     bottle.redirect('/')
 
 @bottle.route('/')
 @bottle.view('index')
 def index():
-    global setup
     return dict({'setup': og.setup})
 
 @bottle.route('/reset')

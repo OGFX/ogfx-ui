@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cstdlib>
 
-int channel_switch;
+int channel_switch = 1;
 
 jack_port_t *in0;
 jack_port_t *in1;
@@ -101,11 +101,10 @@ int main(int argc, char *argv[]) {
   
   int n;
   while (std::cin >> n) {
-    // std::cout << "got : " << n << std::endl;
+    std::cout << "got : " << n << std::endl;
     if (0 == n) {
       channel_switch = 0;
-    }
-    if (0 != n) {
+    } else {
       channel_switch = 1;
     }
   }
