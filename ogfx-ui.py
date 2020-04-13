@@ -156,11 +156,11 @@ def upload_setup():
     return dict({'remaining_path': ''})
 
 
-def checkbox_to_int(value):
+def checkbox_to_bool(value):
     if value == 'on':
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 @bottle.route('/', method='POST')
 def index_post():
@@ -168,12 +168,12 @@ def index_post():
     for rack in og.setup['racks']:
         param_name = 'rack_enabled_{}'.format(rack_index)
         logging.debug(param_name)
-        og.toggle_rack_active(rack_index, checkbox_to_int(bottle.request.forms.get(param_name)))
+        og.toggle_rack_active(rack_index, checkbox_to_bool(bottle.request.forms.get(param_name)))
         unit_index = 0
         for unit in rack['units']:
             param_name = 'unit_enabled_{}_{}'.format(rack_index, unit_index)
             logging.debug(param_name)
-            og.toggle_unit_active(rack_index, unit_index, checkbox_to_int(bottle.request.forms.get(param_name)))
+            og.toggle_unit_active(rack_index, unit_index, checkbox_to_bool(bottle.request.forms.get(param_name)))
             port_index = 0
             for port in unit['input_control_ports']:
                 param_name = 'input_control_port_value_text_{}_{}_{}'.format(rack_index, unit_index, port_index)

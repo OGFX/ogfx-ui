@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cstdlib>
 
-int channel_switch = 1;
+int channel_switch = 0;
 
 jack_port_t *in0;
 jack_port_t *in1;

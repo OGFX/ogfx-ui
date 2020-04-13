@@ -132,7 +132,7 @@ class ogfx:
         logging.debug('setting unit active: {} {} -> {}'.format(rack_index, unit_index, active))
         unit = self.setup['racks'][rack_index]['units'][unit_index]
         process = self.subprocess_map[unit['uuid']][0]
-        process.stdin.write('{}\n'.format(active).encode('utf-8'))
+        process.stdin.write('{}\n'.format(1 if active else 0).encode('utf-8'))
         process.stdin.flush()
         unit['enabled'] = bool(active)
         
@@ -210,12 +210,14 @@ class ogfx:
         self.rewire_manage_subprocesses()
         old_connections = self.connections
         self.connections = []
-        for rack in self.setup['racks']:
+        for rack_index in range(0, len(self.setup['racks'])):
+            rack = self.setup['racks'][rack_index]
             logging.debug('rewiring rack...')
             units = rack['units']
             logging.debug('internal and extra connections...')
             for unit_index in range(0, len(units)):
                 unit = units[unit_index]
+                self.toggle_unit_active(rack_index, unit_index, unit['enabled'])
                 logging.debug('connections for unit {}'.format(unit['name']))
                 # Extra connections
                 port_index = 0
@@ -237,9 +239,9 @@ class ogfx:
                     
                 # Internal connections:
                 if len(unit['input_audio_ports']) >= 1:
-                    self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out00'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
+                    self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out10'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
                 if len(unit['input_audio_ports']) >= 2:
-                    self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out01'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
+                    self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out11'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
 
             logging.debug('linear connections...')
             for unit_index in range(1, len(units)):
@@ -249,14 +251,14 @@ class ogfx:
                 if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
                     if len(unit['input_audio_ports']) >= 1:
                         self.connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out10'),
+                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
                         self.connections.append((
                             '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
                     if len(unit['input_audio_ports']) >= 2:
                         self.connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out11'),
+                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
                         self.connections.append((
                             '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
@@ -264,10 +266,10 @@ class ogfx:
                 else:
                     if (len(unit['input_audio_ports']) >= 2) and (len(prev_unit['output_audio_ports']) == 1):
                         self.connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out10'),
+                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
                         self.connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out10'),
+                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
                             '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
                         self.connections.append((
                             '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
