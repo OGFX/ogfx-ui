@@ -207,8 +207,16 @@ def midi_in():
         time.sleep(0.01)
         pass
 
+
 try:
-    if True:
+    if arguments.setup:
+        logging.info('loading setup {}...'.format(arguments.setup))
+        with open(arguments.setup) as f:
+            json_content = f.read()
+            setup = json.loads(json_content)
+            og.setup = setup
+            og.rewire()
+    if False:
         logging.info('adding example data...')
         
         og.add_rack(0)

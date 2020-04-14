@@ -175,11 +175,14 @@ class ogfx:
                             stdin=subprocess.PIPE), 
                         subprocess.Popen(
                             ['stdbuf', '-i0', '-o0', '-e0', 'jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE))
+                    
                     while not self.rewire_port_with_prefix_exists(switch_unit_jack_client_name(unit)):
                         time.sleep(0.01)
                     while not self.rewire_port_with_prefix_exists(unit_jack_client_name(unit)):
                         time.sleep(0.01)
                         
+                    self.subprocess_map[unit['uuid']][0].stdin.write('1\n'.encode('utf-8'))
+                    self.subprocess_map[unit['uuid']][0].stdin.flush()
         self.rewire_remove_leftover_subprocesses()
 
 
@@ -219,6 +222,11 @@ class ogfx:
                 unit = units[unit_index]
                 self.toggle_unit_active(rack_index, unit_index, unit['enabled'])
                 logging.debug('connections for unit {}'.format(unit['name']))
+
+                port_index = 0
+                for port in unit['input_control_ports']:
+                    self.set_port_value(rack_index, unit_index, port_index, port['value'])
+                    port_index += 1
                 # Extra connections
                 port_index = 0
                 for port in unit['extra_input_connections']:
