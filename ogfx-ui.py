@@ -72,14 +72,9 @@ def connect(rack_index, unit_index, channel_index, direction):
         ports = jack_client.get_ports(is_output=True, is_audio=True)
         return dict({'ports': ports, 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
 
-def disconnect0(rack_index, unit_index, channel_index, connection_index):
-    global setup
-    del setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index][connection_index]
-    rewire()
-
 @bottle.route('/disconnect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<connection_index:int>')
 def disconnect(rack_index, unit_index, channel_index, connection_index):
-    disconnect0(rack_index, unit_index, channel_index, connection_index)
+    og.disconnect(rack_index, unit_index, channel_index, connection_index)
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 # UNITS 

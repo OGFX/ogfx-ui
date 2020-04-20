@@ -181,32 +181,36 @@ class ogfx:
                     while not self.rewire_port_with_prefix_exists(unit_jack_client_name(unit)):
                         time.sleep(0.01)
                         
-                    self.subprocess_map[unit['uuid']][0].stdin.write('1\n'.encode('utf-8'))
-                    self.subprocess_map[unit['uuid']][0].stdin.flush()
+                    # self.subprocess_map[unit['uuid']][0].stdin.write('1\n'.encode('utf-8'))
+                    # self.subprocess_map[unit['uuid']][0].stdin.flush()
         self.rewire_remove_leftover_subprocesses()
 
 
-    def connect(self, port1, port2):
+    def connect_jack_ports(self, port1, port2):
         try:
             logging.debug('connecting {} -> {}'.format(port1, port2))
             subprocess.check_call(['jack_connect', port1, port2])
         except:
             logging.debug('failed to connect {} -> {}'.format(port1, port2))
             
-    def disconnect(self, port1, port2):
+    def disconnect_jack_ports(self, port1, port2):
         try:
             logging.debug('discconnecting {} -> {}'.format(port1, port2))
             subprocess.check_call(['jack_disconnect', port1, port2])
         except:
             logging.debug('failed to disconnect {} -> {}'.format(port1, port2))
     
+    def disconnect(rack_index, unit_index, channel_index, connection_index):
+        del self.setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index][connection_index]
+        self.rewire()
+
     def rewire_update_connections(self, old_connections, new_connections):
         for connection in new_connections:
             if not connection in old_connections:
-                self.connect(connection[0], connection[1])
+                self.connect_jack_ports(connection[0], connection[1])
         for connection in old_connections:
             if not connection in new_connections:
-                self.disconnect(connection[0], connection[1])
+                self.disconnect_jack_ports(connection[0], connection[1])
         
     def rewire(self):
         logging.info('rewire...')
