@@ -56,20 +56,18 @@ og.start_threads()
 logging.info('setting up routes...')
 @bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>/<port_index:int>')
 def connect2(rack_index, unit_index, channel_index, port_index):
-    global setup
-    setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index].insert(0,  ports[port_index].name)
+    og.setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index].insert(0,  ports[port_index].name)
     rewire()
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 @bottle.route('/connect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<direction:path>')
 @bottle.view('connect')
 def connect(rack_index, unit_index, channel_index, direction):
-    global ports
     if direction == 'output':
-        ports = jack_client.get_ports(is_input=True, is_audio=True)
+        ports = og.find_jack_audio_port_names('input')
         return dict({'ports': ports, 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
     else:
-        ports = jack_client.get_ports(is_output=True, is_audio=True)
+        ports = og.find_jack_audio_port_names('output')
         return dict({'ports': ports, 'remaining_path': '/{}/{}/{}'.format(rack_index, unit_index, channel_index) })
 
 @bottle.route('/disconnect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<connection_index:int>')
@@ -140,9 +138,8 @@ def upload_setup2():
     upload_contents = io.BytesIO()
     upload.save(upload_contents)
     logging.info(upload_contents.getvalue())
-    global setup
-    setup = json.loads(upload_contents.getvalue())
-    rewire()
+    og.setup = json.loads(upload_contents.getvalue())
+    og.rewire()
     bottle.redirect('/')
 
 @bottle.route('/upload')

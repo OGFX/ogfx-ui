@@ -144,6 +144,32 @@ class ogfx:
         self.add_unit(rack_index, len(self.setup['racks'][rack_index]['units']), uri)
         # add_unit calls rewire()
 
+    def find_jack_audio_port_names(self, direction):
+        output = subprocess.check_output(['./jack_list_ports'])
+        all_ports = json.loads(output)
+        ports = []
+        for port in all_ports:
+            if port['type'] == '32 bit float mono audio' and direction == 'input' and port['input'] == 1:
+                ports.append(port['name'])
+
+    def connect_jack_ports(self, port1, port2):
+        try:
+            logging.debug('connecting {} -> {}'.format(port1, port2))
+            subprocess.check_call(['jack_connect', port1, port2])
+        except:
+            logging.debug('failed to connect {} -> {}'.format(port1, port2))
+            
+    def disconnect_jack_ports(self, port1, port2):
+        try:
+            logging.debug('discconnecting {} -> {}'.format(port1, port2))
+            subprocess.check_call(['jack_disconnect', port1, port2])
+        except:
+            logging.debug('failed to disconnect {} -> {}'.format(port1, port2))
+    
+    def disconnect(rack_index, unit_index, channel_index, connection_index):
+        del self.setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index][connection_index]
+        self.rewire()
+
     def rewire_port_with_prefix_exists(self, s):
         ports_json_string = subprocess.check_output(['./jack_list_ports'])
         ports = json.loads(ports_json_string)
@@ -184,25 +210,6 @@ class ogfx:
                     # self.subprocess_map[unit['uuid']][0].stdin.write('1\n'.encode('utf-8'))
                     # self.subprocess_map[unit['uuid']][0].stdin.flush()
         self.rewire_remove_leftover_subprocesses()
-
-
-    def connect_jack_ports(self, port1, port2):
-        try:
-            logging.debug('connecting {} -> {}'.format(port1, port2))
-            subprocess.check_call(['jack_connect', port1, port2])
-        except:
-            logging.debug('failed to connect {} -> {}'.format(port1, port2))
-            
-    def disconnect_jack_ports(self, port1, port2):
-        try:
-            logging.debug('discconnecting {} -> {}'.format(port1, port2))
-            subprocess.check_call(['jack_disconnect', port1, port2])
-        except:
-            logging.debug('failed to disconnect {} -> {}'.format(port1, port2))
-    
-    def disconnect(rack_index, unit_index, channel_index, connection_index):
-        del self.setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index][connection_index]
-        self.rewire()
 
     def rewire_update_connections(self, old_connections, new_connections):
         for connection in new_connections:
