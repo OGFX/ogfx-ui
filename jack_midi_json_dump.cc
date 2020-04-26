@@ -44,16 +44,6 @@ extern "C" {
   }
 }
 
-/*
-  A small program that dumps midi cc events it
-  gets to stdout as JSON objects (one per line) in the form:
-
-  { bytes: [ 76, 23, 11 ] }
-
-  where bytes are values between 0 and 255. Right now this 
-  program is limited to the 3-byte messages control change
-  and pitch bend change.
-*/
 int main(int argc, char *argv[]) {
   std::string name;
   
@@ -97,20 +87,25 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  std::cout << "Feed me an integer and an end-of-line and I'll show you an event if I got one since the last time..." << std::endl;
+  
   while(true) {
-    usleep(1000);
+    int n;
+    std::cin >> n;
 
     size_t available;
 
-    while((available = jack_ringbuffer_read_space(ringbuffer)) >= 3) {
+    if ((available = jack_ringbuffer_read_space(ringbuffer)) >= 3) {
       char data[message_size];
       jack_ringbuffer_read(ringbuffer, data, message_size);
 
       std::cout
-	<< "{ \"bytes\": [ "
+	<< "{ \"e\": [ "
 	<< (int)((uint8_t)data[0]) << ", " << (int)((uint8_t)data[1]) << ", " << (int)((uint8_t)data[2])
 	<< " ] }"
 	<< std::endl;
+    } else {
+      std::cout << "{ \"e\": [] }" << std::endl;
     }
   }
   

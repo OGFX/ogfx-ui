@@ -12,7 +12,12 @@
             <table>
                 % index = 0
                 % for port in ports:
-                    <tr><td><a href="/connect2{{remaining_path}}/{{index}}">{{port.name}}</a></td></tr>
+                <tr>
+                  <td><a href="/connect2{{remaining_path}}/{{port['name']}}">{{port['name']}}</a></td>
+                  <td>[{{port['type']}}]</td>
+                  <td>[{{port['input']}}]</td>
+                  <td>[{{port['output']}}]</td>
+                </tr>
                     % index = index + 1
                 %end
         </div>

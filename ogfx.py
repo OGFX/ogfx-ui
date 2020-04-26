@@ -10,7 +10,7 @@ def unit_jack_client_name(unit):
     return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
 
 def switch_unit_jack_client_name(unit):
-    return '{}-{}'.format(unit['uuid'][0:8], 'switch')
+    return '{}-{}-{}'.format(unit['uuid'][0:8], unit['name'], 'switch')
 
 class ogfx:
     def __init__(self, lv2_world):
@@ -58,12 +58,12 @@ class ogfx:
         
     def create_setup(self):
         logging.info("creating (empty default) setup...")
-        self.setup = {'name': 'new setup', 'racks': [] }
+        self.setup = {'name': 'new setup', 'racks': [], 'schema-version': 1 }
         self.rewire()
 
     
     def add_rack(self, rack_index):
-        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None})
+        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]]})
         self.rewire()
 
     def delete_rack(self, rack_index):
@@ -144,14 +144,15 @@ class ogfx:
         self.add_unit(rack_index, len(self.setup['racks'][rack_index]['units']), uri)
         # add_unit calls rewire()
 
-    def find_jack_audio_port_names(self, direction):
+    def find_jack_audio_ports(self, direction):
         output = subprocess.check_output(['./jack_list_ports'])
         all_ports = json.loads(output)
         ports = []
         for port in all_ports:
-            if port['type'] == '32 bit float mono audio' and direction == 'input' and port['input'] == 1:
-                ports.append(port['name'])
-
+            if port['type'] == '32 bit float mono audio' and direction == direction and port[direction] == 1:
+                ports.append(port)
+        return ports
+    
     def connect_jack_ports(self, port1, port2):
         try:
             logging.debug('connecting {} -> {}'.format(port1, port2))
@@ -166,8 +167,8 @@ class ogfx:
         except:
             logging.debug('failed to disconnect {} -> {}'.format(port1, port2))
     
-    def disconnect(rack_index, unit_index, channel_index, connection_index):
-        del self.setup['racks'][rack_index]['units'][unit_index]['connections'][channel_index][connection_index]
+    def disconnect(self, rack_index, unit_index, channel_index, direction, connection_index):
+        del self.setup['racks'][rack_index]['units'][unit_index]['extra_' + direction + '_connections'][channel_index][connection_index]
         self.rewire()
 
     def rewire_port_with_prefix_exists(self, s):
@@ -183,7 +184,9 @@ class ogfx:
                 logging.info('removing unit {}'.format(unit_uuid))
                 for process in self.subprocess_map[unit_uuid]:
                     process.stdin.close()
-                    # process.terminate()
+                    # while not process.returncode:
+                    #     process.poll()
+                    process.terminate()
                     # FIXME Make sure the wait time is bounded!
                     process.wait()
                 del self.subprocess_map[unit_uuid]
