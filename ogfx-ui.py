@@ -54,23 +54,22 @@ og = ogfx.ogfx(lv2_world)
 og.start_threads()
 
 logging.info('setting up routes...')
-@bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<channel_index:int>/<direction>/<port_name>')
+@bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<direction>/<channel_index:int>/<port_name>')
 def connect2(rack_index, unit_index, channel_index, direction, port_name):
     og.setup['racks'][rack_index]['units'][unit_index]['extra_' + direction + '_connections'][channel_index].append(port_name)
     og.rewire()
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
-@bottle.route('/connect/<rack_index:int>/<unit_index:int>/<channel_index:int>/<direction>')
+@bottle.route('/connect/<rack_index:int>/<unit_index:int>/<direction>/<channel_index:int>')
 @bottle.view('connect')
 def connect(rack_index, unit_index, channel_index, direction):
-    if direction == 'output':
-        ports = og.find_jack_audio_ports('input')
-        logging.debug('{}'.format(ports))
-        return dict({'ports': ports, 'remaining_path': '/{}/{}/{}/{}'.format(rack_index, unit_index, channel_index, direction) })
-    else:
-        ports = og.find_jack_audio_ports('output')
-        logging.debug('{}'.format(ports))        
-        return dict({'ports': ports, 'remaining_path': '/{}/{}/{}/{}'.format(rack_index, unit_index, channel_index, direction) })
+    jack_port_direction = 'input'
+    if direction == 'input':
+        jack_port_direction = 'output'
+
+    ports = og.find_jack_audio_ports(jack_port_direction)
+    logging.debug('{}'.format(ports))
+    return dict({'ports': ports, 'remaining_path': '/{}/{}/{}/{}'.format(rack_index, unit_index, direction, channel_index) })
 
     logging.error('directions unclear!')
     

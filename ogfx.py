@@ -67,7 +67,7 @@ class ogfx:
         self.rewire()
 
     def delete_rack(self, rack_index):
-        del setup['racks'][int(rack_index)]
+        del self.setup['racks'][int(rack_index)]
         self.rewire()
 
     def unit_in_setup(self, unit_uuid):
