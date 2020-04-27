@@ -270,36 +270,55 @@ class ogfx:
                 logging.debug('unit index {}'.format(unit_index))
                 unit = units[unit_index]
                 prev_unit = units[unit_index - 1]
-                if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
-                    if len(unit['input_audio_ports']) >= 1:
-                        self.connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                        self.connections.append((
+
+                current_ports = len(unit['input_audio_ports'])
+                previous_ports = len(prev_unit['output_audio_ports'])
+                
+                maximum_ports = max(current_ports, previous_ports)
+                maximum_ports = min(2, maximum_ports)
+                logging.debug('maximum of number of ports of current and previous unit: {}'.format(maximum_ports))
+
+                for port_index in range(0, maximum_ports):
+                    current_port = port_index % current_ports
+                    previous_port = port_index % previous_ports
+                    self.connections.append((
+                        '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out0{}'.format(previous_port)),
+                        '{}:{}'.format(switch_unit_jack_client_name(unit), 'in{}'.format(current_port)))) 
+                    self.connections.append((
+                        '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][previous_port]['symbol']),
+                        '{}:{}'.format(switch_unit_jack_client_name(unit), 'in{}'.format(current_port)))) 
+
+                if False:
+                    if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
+                        if len(unit['input_audio_ports']) >= 1:
+                            self.connections.append((
+                                '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
+                                '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
+                            self.connections.append((
                             '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                    if len(unit['input_audio_ports']) >= 2:
-                        self.connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                        self.connections.append((
-                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1')))
-                else:
-                    if (len(unit['input_audio_ports']) >= 2) and (len(prev_unit['output_audio_ports']) == 1):
-                        self.connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                        self.connections.append((
-                            '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                        self.connections.append((
-                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                        self.connections.append((
-                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
-                            '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                        
+                                '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
+                            if len(unit['input_audio_ports']) >= 2:
+                                self.connections.append((
+                                '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
+                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
+                                self.connections.append((
+                                    '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
+                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1')))
+                        else:
+                            if (len(unit['input_audio_ports']) >= 2) and (len(prev_unit['output_audio_ports']) == 1):
+                                self.connections.append((
+                                    '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
+                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
+                                self.connections.append((
+                                    '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
+                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
+                                self.connections.append((
+                                    '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
+                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
+                                self.connections.append((
+                                    '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
+                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
+                            
                     
                         
         self.rewire_update_connections(old_connections, self.connections)

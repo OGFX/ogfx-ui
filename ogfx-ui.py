@@ -79,6 +79,7 @@ def connect(rack_index, unit_index, channel_index, direction):
 def disconnect(rack_index, unit_index, channel_index, direction, connection_index):
     del og.setup['racks'][rack_index]['units'][unit_index][direction + '_connections'][channel_index][connection_index]
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
+    og.rewire()
 
 
 # RACK CONNECTIONS
@@ -103,6 +104,7 @@ def connect(rack_index, channel_index, direction):
 @bottle.route('/disconnect/<rack_index:int>/<direction>/<channel_index:int>/<connection_index:int>')
 def disconnect(rack_index, channel_index, direction, connection_index):
     del og.setup['racks'][rack_index][direction + '_connections'][channel_index][connection_index]
+    og.rewire()
     bottle.redirect('/#unit-{}'.format(rack_index))
 
 # UNITS 
