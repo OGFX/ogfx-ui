@@ -11,6 +11,7 @@
     <div id="top-menu">
       <span>setup: {{setup['name']}}</span>
       <div class="operations">
+        <a href="rename">name</a>
         <a href="save">sv</a> 
         <a href="saveas">(as)</a> 
         <a href="load">ld</a> 
@@ -62,7 +63,7 @@
               <div>input channel-{{channel_index}}:</div>
               % connection_index = 0
               % for connection in channel:
-              <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{channel_index}}/{{connection_index}}">disconnect</a></div>
+              <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/input/{{channel_index}}/{{connection_index}}">disconnect</a></div>
               % connection_index = connection_index + 1
               % end
               <div><a class="operations" href="connect/{{rack_index}}/input/{{channel_index}}">connect</a></div>
@@ -145,11 +146,11 @@
           % end
           <div class="connections-info">
             % channel_index = 0
-            % for channel in rack['input_connections']:
+            % for channel in rack['output_connections']:
             <div>output channel-{{channel_index}}:</div>
             % connection_index = 0
             % for connection in channel:
-            <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{channel_index}}/{{connection_index}}">disconnect</a></div>
+            <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/output/{{channel_index}}/{{connection_index}}">disconnect</a></div>
             % connection_index = connection_index + 1
             % end
             <div><a class="operations" href="connect/{{rack_index}}/output/{{channel_index}}">connect</a></div>

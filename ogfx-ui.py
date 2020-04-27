@@ -54,6 +54,10 @@ og = ogfx.ogfx(lv2_world)
 og.start_threads()
 
 logging.info('setting up routes...')
+
+
+# UNIT CONNECTIONS
+
 @bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<direction>/<channel_index:int>/<port_name>')
 def connect2(rack_index, unit_index, channel_index, direction, port_name):
     og.setup['racks'][rack_index]['units'][unit_index]['extra_' + direction + '_connections'][channel_index].append(port_name)
@@ -71,12 +75,35 @@ def connect(rack_index, unit_index, channel_index, direction):
     logging.debug('{}'.format(ports))
     return dict({'ports': ports, 'remaining_path': '/{}/{}/{}/{}'.format(rack_index, unit_index, direction, channel_index) })
 
-    logging.error('directions unclear!')
-    
 @bottle.route('/disconnect/<rack_index:int>/<unit_index:int>/<direction>/<channel_index:int>/<connection_index:int>')
 def disconnect(rack_index, unit_index, channel_index, direction, connection_index):
-    og.disconnect(rack_index, unit_index, channel_index, direction, connection_index)
+    del og.setup['racks'][rack_index]['units'][unit_index]['extra_' + direction + '_connections'][channel_index][connection_index]
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
+
+
+# RACK CONNECTIONS
+
+@bottle.route('/connect2/<rack_index:int>/<direction>/<channel_index:int>/<port_name>')
+def connect2(rack_index, channel_index, direction, port_name):
+    og.setup['racks'][rack_index][direction + '_connections'][channel_index].append(port_name)
+    og.rewire()
+    bottle.redirect('/#rack-{}'.format(rack_index))
+
+@bottle.route('/connect/<rack_index:int>/<direction>/<channel_index:int>')
+@bottle.view('connect')
+def connect(rack_index, channel_index, direction):
+    jack_port_direction = 'input'
+    if direction == 'input':
+        jack_port_direction = 'output'
+
+    ports = og.find_jack_audio_ports(jack_port_direction)
+    logging.debug('{}'.format(ports))
+    return dict({'ports': ports, 'remaining_path': '/{}/{}/{}'.format(rack_index, direction, channel_index) })
+
+@bottle.route('/disconnect/<rack_index:int>/<direction>/<channel_index:int>/<connection_index:int>')
+def disconnect(rack_index, channel_index, direction, connection_index):
+    del og.setup['racks'][rack_index][direction + '_connections'][channel_index][connection_index]
+    bottle.redirect('/#unit-{}'.format(rack_index))
 
 # UNITS 
 
