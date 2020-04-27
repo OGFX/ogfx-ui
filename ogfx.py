@@ -186,7 +186,7 @@ class ogfx:
                     process.stdin.close()
                     # while not process.returncode:
                     #     process.poll()
-                    process.terminate()
+                    # process.terminate()
                     # FIXME Make sure the wait time is bounded!
                     process.wait()
                 del self.subprocess_map[unit_uuid]
