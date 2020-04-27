@@ -106,7 +106,7 @@ class ogfx:
                 input_control_ports.append(control_port)
 
         unit_uuid = str(uuid.uuid4())
-        self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'extra_input_connections': extra_input_connections, 'extra_output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': None })
+        self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'input_connections': extra_input_connections, 'output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': None })
 
         self.rewire()
 
@@ -168,7 +168,7 @@ class ogfx:
             logging.debug('failed to disconnect {} -> {}'.format(port1, port2))
     
     def disconnect(self, rack_index, unit_index, channel_index, direction, connection_index):
-        del self.setup['racks'][rack_index]['units'][unit_index]['extra_' + direction + '_connections'][channel_index][connection_index]
+        del self.setup['racks'][rack_index]['units'][unit_index][direction + '_connections'][channel_index][connection_index]
         self.rewire()
 
     def rewire_port_with_prefix_exists(self, s):
@@ -243,7 +243,7 @@ class ogfx:
                     port_index += 1
                 # Extra connections
                 port_index = 0
-                for port in unit['extra_input_connections']:
+                for port in unit['input_connections']:
                     # logging.debug(port)
                     for connection in port:
                         c = [connection, '{}:{}'.format(switch_unit_jack_client_name(unit), 'in{}'.format(port_index))]
@@ -252,7 +252,7 @@ class ogfx:
                     port_index += 1
                     
                 port_index = 0
-                for port in unit['extra_output_connections']:
+                for port in unit['output_connections']:
                     for connection in port:
                         c = ['{}:{}'.format(unit_jack_client_name(unit), unit['output_audio_ports'][port_index]['symbol']), connection]
                         logging.debug(c)

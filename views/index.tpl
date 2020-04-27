@@ -98,7 +98,7 @@
             </div>
             <div class="connections-info">
               % channel_index = 0
-              % for channel in unit['extra_input_connections']:
+              % for channel in unit['input_connections']:
               <div>input channel-{{channel_index}}:</div>
               % connection_index = 0
               % for connection in channel:
@@ -127,7 +127,7 @@
             </div>
             <div class="connections-info">
               % channel_index = 0
-              % for channel in unit['extra_output_connections']:
+              % for channel in unit['output_connections']:
               <div>output channel-{{channel_index}}:</div>
               % connection_index = 0
               % for connection in channel:

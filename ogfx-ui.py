@@ -60,7 +60,7 @@ logging.info('setting up routes...')
 
 @bottle.route('/connect2/<rack_index:int>/<unit_index:int>/<direction>/<channel_index:int>/<port_name>')
 def connect2(rack_index, unit_index, channel_index, direction, port_name):
-    og.setup['racks'][rack_index]['units'][unit_index]['extra_' + direction + '_connections'][channel_index].append(port_name)
+    og.setup['racks'][rack_index]['units'][unit_index][direction + '_connections'][channel_index].append(port_name)
     og.rewire()
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
@@ -77,7 +77,7 @@ def connect(rack_index, unit_index, channel_index, direction):
 
 @bottle.route('/disconnect/<rack_index:int>/<unit_index:int>/<direction>/<channel_index:int>/<connection_index:int>')
 def disconnect(rack_index, unit_index, channel_index, direction, connection_index):
-    del og.setup['racks'][rack_index]['units'][unit_index]['extra_' + direction + '_connections'][channel_index][connection_index]
+    del og.setup['racks'][rack_index]['units'][unit_index][direction + '_connections'][channel_index][connection_index]
     bottle.redirect('/#unit-{}-{}'.format(rack_index, unit_index))
 
 
@@ -254,12 +254,12 @@ try:
 
         og.append_unit(0, 'http://calf.sourceforge.net/plugins/Reverb')
         
-        og.setup['racks'][0]['units'][0]['extra_input_connections'][0].append('system:capture_2')
+        og.setup['racks'][0]['units'][0]['input_connections'][0].append('system:capture_2')
 
 
         og.append_unit(0, 'http://plugin.org.uk/swh-plugins/sc4')
-        og.setup['racks'][0]['units'][-1]['extra_output_connections'][0].append('system:playback_1')
-        og.setup['racks'][0]['units'][-1]['extra_output_connections'][1].append('system:playback_2')
+        og.setup['racks'][0]['units'][-1]['output_connections'][0].append('system:playback_1')
+        og.setup['racks'][0]['units'][-1]['output_connections'][1].append('system:playback_2')
         
         og.rewire()
         
