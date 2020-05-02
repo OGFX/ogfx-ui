@@ -2,6 +2,9 @@
 
 all: lv2lsjson jack_switch jack_midi_json_dump jack_list_ports
 
+clean: 
+	rm -f lv2lsjson jack_swith jack_midi_json_dump jack_list_ports
+
 lv2lsjson: lv2lsjson.cc
 	$(CXX) -O3 -march=native -Wall -Werror -Wno-conversion -o lv2lsjson lv2lsjson.cc `pkg-config lilv-0 --cflags --libs`
 
