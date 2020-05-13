@@ -1,6 +1,14 @@
-.PHONY: clean all
+PREFIX ?= /usr/local
+
+.PHONY: clean all install
 
 all: lv2lsjson jack_switch jack_midi_json_dump jack_list_ports
+
+install: all
+	install lv2lsjson ${PREFIX}/bin/
+	install jack_switch ${PREFIX}/bin/
+	install jack_midi_json_dump ${PREFIX}/bin/
+	install jack_list_ports ${PREFIX}/bin/
 
 clean:
 	rm lv2lsjson jack_switch jack_midi_json_dump jack_list_ports
