@@ -11,15 +11,16 @@
             <span>Choose a file:</span>
             <table>
                 % index = 0
-                % for port in ports:
+                % for file in files:
                 <tr>
-                  <td><a href="/connect2{{remaining_path}}/{{port['name']}}">{{port['name']}}</a></td>
-                  <td>[{{port['type']}}]</td>
-                  <td>[{{port['input']}}]</td>
+                  <td><a href="/select_file2{{remaining_path}}/{{file['name']}}">{{file['name']}}</a></td>
+                  <td>[{{file['size']}}]</td>
+                  <td>[{{file['date']}}]</td>
                   <td>[{{port['output']}}]</td>
                 </tr>
-                    % index = index + 1
-                %end
+                % index = index + 1
+                % end
+             </table>
         </div>
     </body>
 </html>

@@ -18,8 +18,9 @@
                   <td>[{{port['input']}}]</td>
                   <td>[{{port['output']}}]</td>
                 </tr>
-                    % index = index + 1
-                %end
+                % index = index + 1
+                % end
+            </table>
         </div>
     </body>
 </html>
