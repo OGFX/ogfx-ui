@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import ogfx
-# import ogfx.xdg
+import ogfx.xdg
 
 # External dependencies imports
 import bottle
@@ -51,7 +51,7 @@ lv2_world = json.loads(lv2_world_json_string)
 logging.info('number of plugins: {}'.format(len(lv2_world)))
 
 
-og = ogfx.ogfx.ogfx(lv2_world)
+og = ogfx.ogfx(lv2_world)
 og.start_threads()
 
 if os.path.exists(default_setup_file_path):
