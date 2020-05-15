@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+import ogfx
+# import ogfx.xdg
+
 # External dependencies imports
 import bottle
 
 # python3 imports
 import json
-import xdg
 import os
 import copy
 import io
@@ -19,7 +21,6 @@ import time
 import sys
 import traceback
 
-import ogfx
 
 arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
 arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=4)
@@ -30,9 +31,9 @@ log_levels_map = {5: logging.DEBUG, 4: logging.INFO, 3: logging.WARNING, 2: logg
 
 logging.basicConfig(level=log_levels_map[arguments.log_level], format='%(asctime)s %(message)s')
 
-setups_path = os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'setups')
-racks_path = os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'racks')
-units_path = os.path.join(xdg.XDG_DATA_HOME, 'ogfx', 'units')
+setups_path = os.path.join(ogfx.xdg.XDG_DATA_HOME, 'ogfx', 'setups')
+racks_path = os.path.join(ogfx.xdg.XDG_DATA_HOME, 'ogfx', 'racks')
+units_path = os.path.join(ogfx.xdg.XDG_DATA_HOME, 'ogfx', 'units')
 
 for path in [setups_path, racks_path, units_path]:
     if not os.path.exists(path):
@@ -45,12 +46,12 @@ logging.info('using units path {}'.format(units_path))
 default_setup_file_path = os.path.join(setups_path, 'default.ogfx-setup')
 
 logging.info('scanning for lv2 plugins...')
-lv2_world_json_string = subprocess.check_output(['./lv2lsjson'])
+lv2_world_json_string = subprocess.check_output(['ogfx_lv2ls'])
 lv2_world = json.loads(lv2_world_json_string)
 logging.info('number of plugins: {}'.format(len(lv2_world)))
 
 
-og = ogfx.ogfx(lv2_world)
+og = ogfx.ogfx.ogfx(lv2_world)
 og.start_threads()
 
 if os.path.exists(default_setup_file_path):
