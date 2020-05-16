@@ -7,7 +7,7 @@ setup(
     scripts = ['ogfx-ui.py',],
     packages = ['ogfx'],
     data_files = [
-        ('views', [ 'views/add_unit.tpl', 'views/index.tpl' ]),
+        ('views', [ 'views/add_unit.tpl', 'views/index.tpl', 'views/connect.tpl' , 'views/upload.tpl', 'views/file_chooser.tpl'  ]),
         ('static', [ 'static/index.css', 'static/range.css' ])
     ]
 )
