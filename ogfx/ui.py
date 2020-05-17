@@ -22,6 +22,7 @@ import sys
 import traceback
 
 
+
 arguments_parser = argparse.ArgumentParser(description='ogfx-ui - a web interface for OGFX')
 arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=4)
 arguments_parser.add_argument('--setup', dest='setup', action='store', help='A file containing a setup to load at startup')
@@ -30,6 +31,8 @@ arguments = arguments_parser.parse_args()
 log_levels_map = {5: logging.DEBUG, 4: logging.INFO, 3: logging.WARNING, 2: logging.ERROR, 1: logging.CRITICAL}
 
 logging.basicConfig(level=log_levels_map[arguments.log_level], format='%(asctime)s %(message)s')
+
+logging.info((os.path.dirname(__file__)))
 
 setups_path = os.path.join(ogfx.xdg.XDG_DATA_HOME, 'ogfx', 'setups')
 racks_path = os.path.join(ogfx.xdg.XDG_DATA_HOME, 'ogfx', 'racks')
