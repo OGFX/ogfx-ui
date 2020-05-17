@@ -12,7 +12,7 @@ def unit_jack_client_name(unit):
 def switch_unit_jack_client_name(unit):
     return '{}-{}-{}'.format(unit['uuid'][0:8], unit['name'], 'switch')
 
-class backend:
+class jalv:
     def __init__(self, lv2_world):
         self.lv2_world = lv2_world
         self.create_units_map()
