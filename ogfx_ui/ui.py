@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import ogfx
-import ogfx.xdg
+from .backends import jalv
+from .xdg import *
 
 # External dependencies imports
 import bottle
@@ -11,13 +11,10 @@ import json
 import os
 import copy
 import io
-import subprocess
-import uuid
 import logging
 import argparse
-import socket
-import threading
 import time
+import subprocess
 import sys
 import traceback
 
@@ -34,9 +31,9 @@ logging.basicConfig(level=log_levels_map[arguments.log_level], format='%(asctime
 
 logging.info((os.path.dirname(__file__)))
 
-setups_path = os.path.join(ogfx.xdg.XDG_DATA_HOME, 'ogfx', 'setups')
-racks_path = os.path.join(ogfx.xdg.XDG_DATA_HOME, 'ogfx', 'racks')
-units_path = os.path.join(ogfx.xdg.XDG_DATA_HOME, 'ogfx', 'units')
+setups_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'setups')
+racks_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'racks')
+units_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'units')
 
 for path in [setups_path, racks_path, units_path]:
     if not os.path.exists(path):
@@ -54,7 +51,7 @@ lv2_world = json.loads(lv2_world_json_string)
 logging.info('number of plugins: {}'.format(len(lv2_world)))
 
 
-og = ogfx.backend(lv2_world)
+og = jalv(lv2_world)
 og.start_threads()
 
 if os.path.exists(default_setup_file_path):
