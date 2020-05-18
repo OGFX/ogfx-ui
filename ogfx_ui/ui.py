@@ -29,7 +29,9 @@ log_levels_map = {5: logging.DEBUG, 4: logging.INFO, 3: logging.WARNING, 2: logg
 
 logging.basicConfig(level=log_levels_map[arguments.log_level], format='%(asctime)s %(message)s')
 
+
 logging.info((os.path.dirname(__file__)))
+bottle.TEMPLATE_PATH.insert(0,os.path.abspath(os.path.join(os.path.dirname(__file__), 'views')))
 
 setups_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'setups')
 racks_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'racks')
@@ -226,10 +228,12 @@ def resetet():
     og.create_setup()
     bottle.redirect('/')
 
-
+    
+# STATIC FILES
+    
 @bottle.route('/static/<filepath:path>')
 def static(filepath):
-    return bottle.static_file(filepath, root='static/')
+    return bottle.static_file(filepath, root=os.path.abspath(os.path.join(os.path.dirname(__file__), 'static/')))
 
 midi_in_quit = False
 def midi_in():
