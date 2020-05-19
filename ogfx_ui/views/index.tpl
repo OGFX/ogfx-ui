@@ -40,8 +40,8 @@
         % rack_index = 0
         % for rack in setup['racks']:
         <div class="rack" id="rack-{{rack_index}}">
-          <div>
-            <span>{{rack_index}}._._:</span>
+          <details>
+            <summary>{{rack_index}}._._:</summary>
             <a href="/cc/{{rack_index}}">cc</a>
             <span>--:--</span>
             <input type="checkbox" checked="{{rack['enabled']}}" name="rack_enabled_{{rack_index}}">
@@ -70,7 +70,7 @@
               % channel_index = channel_index + 1
               % end
             </div>
-          </div>
+          </details>
           <div class="add-unit">
             <a href="add/{{rack_index}}/0">add unit</a>
           </div>
