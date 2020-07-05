@@ -198,12 +198,17 @@ class jalv:
             for unit in rack['units']:
                 if unit['uuid'] not in self.subprocess_map:
                     logging.debug('starting subprocess...')
-                    self.subprocess_map[unit['uuid']] = (
-                        subprocess.Popen(
+                    # FIXME: investigate why sometimes the jack_switches do not meet their jack
+                    # process deadline
+                    time.sleep(0.1)
+                    p1 = subprocess.Popen(
                             ['stdbuf', '-i0', '-o0', '-e0', 'ogfx_jack_switch', '-n', switch_unit_jack_client_name(unit)], 
-                            stdin=subprocess.PIPE), 
-                        subprocess.Popen(
-                            ['stdbuf', '-i0', '-o0', '-e0', 'jalv', '-n', unit_jack_client_name(unit), unit['uri']], stdin=subprocess.PIPE))
+                            stdin=subprocess.PIPE) 
+                    time.sleep(0.1)
+                    p2 = subprocess.Popen(
+                            ['stdbuf', '-i0', '-o0', '-e0', 'jalv', '-n', unit_jack_client_name(unit), unit['uri']], 
+                            stdin=subprocess.PIPE)
+                    self.subprocess_map[unit['uuid']] = (p1, p2)
                     
                     while not self.rewire_port_with_prefix_exists(switch_unit_jack_client_name(unit)):
                         time.sleep(0.01)
