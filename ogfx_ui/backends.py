@@ -52,6 +52,15 @@ class jalv:
 
         logging.info('registering lv2 plugins...')
         for p in self.lv2_world:
+            num_input_ports = 0
+            num_output_ports = 0
+            for port in p['ports']:
+                if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#AudioPort']:
+                    num_input_ports += 1
+                if port['http://lv2plug.in/ns/lv2core#OutputPort'] and port['http://lv2plug.in/ns/lv2core#AudioPort']:
+                    num_output_ports += 1
+            if num_input_ports == 0 or num_output_ports == 0:
+                continue
             logging.debug('{} ({})'.format(p['name'], p['uri']))
             self.units_map[p['uri']] = {'name': p['name'], 'data': p }
 
