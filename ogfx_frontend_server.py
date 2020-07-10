@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import ogfx_ui
 
 import logging
 import argparse
@@ -18,6 +17,7 @@ log_levels_map = {5: logging.DEBUG, 4: logging.INFO, 3: logging.WARNING, 2: logg
 
 logging.basicConfig(level=log_levels_map[arguments.log_level], format='ogfx: %(asctime)s %(message)s')
 
+import ogfx_ui
 
 logging.info((os.path.dirname(__file__)))
 

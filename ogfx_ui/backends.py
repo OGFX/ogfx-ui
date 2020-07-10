@@ -10,7 +10,7 @@ def unit_jack_client_name(unit):
     return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
 
 def switch_unit_jack_client_name(unit):
-    return '{}-{}-{}'.format(unit['uuid'][0:8], unit['name'], 'switch')
+    return '{}-{}-{}'.format(unit['uuid'][0:8], 'switch', unit['name'])
 
 class jalv:
     def __init__(self, lv2_world):
@@ -184,6 +184,7 @@ class jalv:
                 logging.info('removing unit {}'.format(unit_uuid))
                 for process in self.subprocess_map[unit_uuid]:
                     process.stdin.close()
+                    time.sleep(0.01)
                     # while not process.returncode:
                     #     process.poll()
                     # process.terminate()
@@ -200,11 +201,11 @@ class jalv:
                     logging.debug('starting subprocess...')
                     # FIXME: investigate why sometimes the jack_switches do not meet their jack
                     # process deadline
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     p1 = subprocess.Popen(
                             ['stdbuf', '-i0', '-o0', '-e0', 'ogfx_jack_switch', '-n', switch_unit_jack_client_name(unit)], 
                             stdin=subprocess.PIPE) 
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     p2 = subprocess.Popen(
                             ['stdbuf', '-i0', '-o0', '-e0', 'jalv', '-n', unit_jack_client_name(unit), unit['uri']], 
                             stdin=subprocess.PIPE)
