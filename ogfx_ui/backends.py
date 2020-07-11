@@ -280,6 +280,27 @@ class jalv:
                 if len(unit['input_audio_ports']) >= 2:
                     self.connections.append(('{}:{}'.format(switch_unit_jack_client_name(unit), 'out11'), '{}:{}'.format(unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
 
+            logging.debug('rack connections...')
+            input_is_mono = (not not rack['input_connections'][0]) != (not not rack['input_connections'][1])
+            output_is_mono = (not not rack['output_connections'][0]) != (not not rack['output_connections'][1])
+
+            input_connections = []
+            output_connections = []
+            for channel in range(0,2):
+                if len(rack['input_connections'][channel]):
+                    input_connections.append(rack['input_connections'][channel])
+                if len(rack['output_connections'][channel]):
+                    output_connections.append(rack['output_connections'][channel])
+
+            if len(units) == 0 and (len(input_connections)) and (len(output_connections)):
+                for channel in range(0,2):
+                    inputs = input_connections[channel % len(input_connections)]
+                    outputs = output_connections[channel % len(output_connections)]
+                    for inp in inputs:
+                        for outp in outputs:
+                            self.connections.append((inp, outp))
+
+
             logging.debug('linear connections...')
             for unit_index in range(1, len(units)):
                 logging.debug('unit index {}'.format(unit_index))
