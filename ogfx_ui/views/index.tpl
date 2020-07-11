@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="/static/index.css">
     <link rel="stylesheet" type="text/css" href="/static/range.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/index.js"></script>
   </head>
 
   <body>
@@ -116,8 +117,8 @@
                     <a href="/cc/{{rack_index}}/{{unit_index}}/{{port_index}}">--:--:lin</a>
                     <span>{{port['name']}} [{{port['range'][1]}} {{port['range'][0]}} {{port['range'][2]}}]</span>
                     <div class="control-input-container">
-                      <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off" name="input_control_port_value_slider_{{rack_index}}_{{unit_index}}_{{port_index}}">
-                      <input class="input-control-port-value-text" type="text" inputmode="decimal" value="{{port['value']}}" autocomplete="off" size="5" name="input_control_port_value_text_{{rack_index}}_{{unit_index}}_{{port_index}}">
+                      <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off" name="input_control_port_value_slider_{{rack_index}}_{{unit_index}}_{{port_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}" data-port-index="{{port_index}}">
+                      <input class="input-control-port-value-text" type="text" inputmode="decimal" value="{{port['value']}}" autocomplete="off" size="5" name="input_control_port_value_text_{{rack_index}}_{{unit_index}}_{{port_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}" data-port-index="{{port_index}}">
                     </div>
                   </div>
                   % port_index = port_index + 1
