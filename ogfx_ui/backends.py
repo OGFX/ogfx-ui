@@ -292,14 +292,31 @@ class jalv:
                 if len(rack['output_connections'][channel]):
                     output_connections.append(rack['output_connections'][channel])
 
-            if len(units) == 0 and (len(input_connections)) and (len(output_connections)):
-                for channel in range(0,2):
-                    inputs = input_connections[channel % len(input_connections)]
-                    outputs = output_connections[channel % len(output_connections)]
-                    for inp in inputs:
+            if len(input_connections) and len(output_connections):
+                if len(units) == 0:
+                    logging.debug('empty rack')
+                    for channel in range(0,2):
+                        inputs = input_connections[channel % len(input_connections)]
+                        outputs = output_connections[channel % len(output_connections)]
+                        for inp in inputs:
+                            for outp in outputs:
+                                self.connections.append((inp, outp))
+                else:
+                    logging.debug('non empty rack')
+                    logging.debug('input')
+                    unit = units[0]
+                    for channel in range(0,2):
+                        inputs = input_connections[channel % len(input_connections)]
+                        for inp in inputs:
+                            self.connections.append((inp, '{}:in{}'.format(switch_unit_jack_client_name(unit), (channel % len(unit['input_audio_ports'])))))
+                    
+                    logging.debug('output')
+                    unit = units[-1]
+                    for channel in range(0,2):
+                        outputs = output_connections[channel % len(output_connections)]
                         for outp in outputs:
-                            self.connections.append((inp, outp))
-
+                            self.connections.append(('{}:out0{}'.format(switch_unit_jack_client_name(unit), (channel % len(unit['output_audio_ports']))), outp))
+                            self.connections.append(('{}:{}'.format(unit_jack_client_name(unit), unit['output_audio_ports'][channel % len(unit['output_audio_ports'])]['symbol']), outp))
 
             logging.debug('linear connections...')
             for unit_index in range(1, len(units)):
@@ -331,11 +348,11 @@ class jalv:
                                 '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
                                 '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
                             self.connections.append((
-                            '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
+                                '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
                                 '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
                             if len(unit['input_audio_ports']) >= 2:
                                 self.connections.append((
-                                '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
+                                    '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
                                     '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
                                 self.connections.append((
                                     '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
