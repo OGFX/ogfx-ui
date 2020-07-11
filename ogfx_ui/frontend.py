@@ -100,12 +100,17 @@ def delete_unit(rack_index, unit_index):
     bottle.redirect('/#rack-{}'.format(rack_index))
 
 
+@bottle.route('/enable_unit/<rack_index:int>/<unit_index:int>/<enabled:int>')
+def enable_unit(rack_index, unit_index, enabled):
+    logging.debug('enable unit')
+    og.toggle_unit_active(rack_index, unit_index, enabled != 0)
+
 # PORTS
 
 @bottle.route('/set_port_value/<rack_index:int>/<unit_index:int>/<port_index:int>/<value:float>')
 def set_port_value(rack_index, unit_index, port_index, value):
-    og.set_port_value(rack_index, unit_index, port_index, value)
     logging.debug('set port value')
+    og.set_port_value(rack_index, unit_index, port_index, value)
 
 
 # RACKS

@@ -81,7 +81,7 @@
                 <summary class="unit-info">
                   <span>{{rack_index}}.{{unit_index}}._:</span>
                   <a href="/cc/{{rack_index}}/{{unit_index}}">--:--</a>
-                  <input type="checkbox" {{'checked' if unit['enabled'] else ''}} name="unit_enabled_{{rack_index}}_{{unit_index}}">
+                  <input class="unit_enable_checkbox" type="checkbox" {{'checked' if unit['enabled'] else ''}} name="unit_enabled_{{rack_index}}_{{unit_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}">
                   <span>{{len(unit['input_audio_ports'])}}:{{len(unit['output_audio_ports'])}}</span>
                   <span>{{unit['name']}}</span>
                 </summary>
