@@ -145,6 +145,21 @@ class jalv:
         process.stdin.flush()
         unit['enabled'] = bool(active)
         
+    def move_unit_down(self, rack_index, unit_index):
+        units = self.setup['racks'][rack_index]['units']
+        if unit_index >= (len(units) - 1):
+            return
+
+        units[unit_index + 1], units[unit_index] = units[unit_index], units[unit_index + 1]
+        self.rewire()
+
+    def move_unit_up(self, rack_index, unit_index):
+        units = self.setup['racks'][rack_index]['units']
+        if unit_index < 1:
+            return
+
+        units[unit_index - 1], units[unit_index] = units[unit_index], units[unit_index - 1]
+        self.rewire()
 
     def toggle_rack_active(self, rack_index, active):
         pass
@@ -230,12 +245,13 @@ class jalv:
         self.rewire_remove_leftover_subprocesses()
 
     def rewire_update_connections(self, old_connections, new_connections):
-        for connection in new_connections:
-            if not connection in old_connections:
-                self.connect_jack_ports(connection[0], connection[1])
+        # First remove old connections otherwise we get feedback in order changes :(
         for connection in old_connections:
             if not connection in new_connections:
                 self.disconnect_jack_ports(connection[0], connection[1])
+        for connection in new_connections:
+            if not connection in old_connections:
+                self.connect_jack_ports(connection[0], connection[1])
         
     def rewire(self):
         logging.info('rewire...')
@@ -340,40 +356,7 @@ class jalv:
                     self.connections.append((
                         '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][previous_port]['symbol']),
                         '{}:{}'.format(switch_unit_jack_client_name(unit), 'in{}'.format(current_port)))) 
-
-                if False:
-                    if len(unit['input_audio_ports']) == len(prev_unit['output_audio_ports']):
-                        if len(unit['input_audio_ports']) >= 1:
-                            self.connections.append((
-                                '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
-                                '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                            self.connections.append((
-                                '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
-                                '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                            if len(unit['input_audio_ports']) >= 2:
-                                self.connections.append((
-                                    '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
-                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                                self.connections.append((
-                                    '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][1]['symbol']),
-                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1')))
-                        else:
-                            if (len(unit['input_audio_ports']) >= 2) and (len(prev_unit['output_audio_ports']) == 1):
-                                self.connections.append((
-                                    '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out00'),
-                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                                self.connections.append((
-                                    '{}:{}'.format(switch_unit_jack_client_name(prev_unit), 'out01'),
-                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                                self.connections.append((
-                                    '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
-                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in0'))) 
-                                self.connections.append((
-                                    '{}:{}'.format(unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][0]['symbol']),
-                                    '{}:{}'.format(switch_unit_jack_client_name(unit), 'in1'))) 
-                            
-                    
-                        
+                       
         self.rewire_update_connections(old_connections, self.connections)
 
 

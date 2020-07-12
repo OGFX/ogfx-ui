@@ -105,6 +105,16 @@ def enable_unit(rack_index, unit_index, enabled):
     logging.debug('enable unit')
     og.toggle_unit_active(rack_index, unit_index, enabled != 0)
 
+@bottle.route('/move_unit_down/<rack_index:int>/<unit_index:int>')
+def move_unit_down(rack_index, unit_index):
+    og.move_unit_down(rack_index, unit_index)
+    bottle.redirect('/')
+
+@bottle.route('/move_unit_up/<rack_index:int>/<unit_index:int>')
+def move_unit_up(rack_index, unit_index):
+    og.move_unit_up(rack_index, unit_index)
+    bottle.redirect('/')
+
 # PORTS
 
 @bottle.route('/set_port_value/<rack_index:int>/<unit_index:int>/<port_index:int>/<value:float>')
