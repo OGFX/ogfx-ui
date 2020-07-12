@@ -7,6 +7,6 @@ setup(
     packages = ['ogfx_ui'],
     scripts = [ 'ogfx_frontend_server.py' ],
     package_data = {
-        'ogfx_ui': [ 'views/*.tpl', 'static/*.css' ]
+        'ogfx_ui': [ 'views/*.tpl', 'static/*.css', 'static/*.js' ]
     }
 )

@@ -240,4 +240,4 @@ def run(o):
     global og;
     og = o
     logging.info('starting bottle server...')
-    bottle.run(host='0.0.0.0', port='8080', reload=True, debug=True)
+    bottle.run(host='0.0.0.0', port='8080', debug=True)
