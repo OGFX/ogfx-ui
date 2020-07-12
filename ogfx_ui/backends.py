@@ -145,6 +145,22 @@ class jalv:
         process.stdin.flush()
         unit['enabled'] = bool(active)
         
+    def move_rack_down(self, rack_index):
+        racks = self.setup['racks']
+        if rack_index >= (len(racks) - 1):
+            return
+
+        racks[rack_index + 1], racks[rack_index] = racks[rack_index], racks[rack_index + 1]
+        self.rewire()
+
+    def move_rack_up(self, rack_index):
+        racks = self.setup['racks']
+        if rack_index < 1:
+            return
+
+        racks[rack_index - 1], racks[rack_index] = racks[rack_index], racks[rack_index - 1]
+        self.rewire()
+
     def move_unit_down(self, rack_index, unit_index):
         units = self.setup['racks'][rack_index]['units']
         if unit_index >= (len(units) - 1):

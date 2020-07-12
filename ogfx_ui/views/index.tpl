@@ -48,8 +48,8 @@
               <span>rack-{{rack_index}}</span>
             </summary>
             <div class="operations">
-              <a title="move up" href="moveup/{{rack_index}}">▲</a> 
-              <a title="move down" href="movedown/{{rack_index}}">▼</a> 
+              <a title="move up" href="move_rack_up/{{rack_index}}">▲</a> 
+              <a title="move down" href="move_rack_down/{{rack_index}}">▼</a> 
               <a title="save" href="save/{{rack_index}}">sv</a> 
               <a title="save as..." href="saveas/{{rack_index}}">(as)</a> 
               <a title="load" href="load/{{rack_index}}">ld</a> 

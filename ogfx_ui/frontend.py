@@ -135,6 +135,16 @@ def delete_rack(rack_index):
     og.delete_rack(rack_index)
     bottle.redirect('/')
     
+@bottle.route('/move_rack_down/<rack_index:int>')
+def move_rack_down(rack_index, unit_index):
+    og.move_rack_down(rack_index)
+    bottle.redirect('/')
+
+@bottle.route('/move_rack_up/<rack_index:int>')
+def move_rack_up(rack_index, unit_index):
+    og.move_rack_up(rack_index)
+    bottle.redirect('/')
+
 
 # DOWNLOADS
 
