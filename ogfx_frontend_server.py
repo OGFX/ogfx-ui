@@ -1,12 +1,10 @@
 #!/usr/bin/python3
 
-
 import logging
 import argparse
 import os
 import subprocess
 import json
-
 
 arguments_parser = argparse.ArgumentParser(description='ogfx_ui - a web interface for OGFX')
 arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=4)
@@ -40,11 +38,8 @@ lv2_world_json_string = subprocess.check_output(['ogfx_lv2ls'])
 lv2_world = json.loads(lv2_world_json_string)
 logging.info('number of plugins: {}'.format(len(lv2_world)))
 
-
 og = ogfx_ui.backends.jalv(lv2_world)
 og.start_threads()
-
-
 
 try:
     if arguments.setup:
@@ -62,31 +57,6 @@ try:
                 og.setup = setup
                 og.rewire()
                 
-    if False:
-        logging.info('adding example data...')
-        
-        og.add_rack(0)
-    
-        og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gxts9#ts9sim')
-        og.set_port_value(0, 0, 0, 0)
-        
-        og.append_unit(0, 'http://guitarix.sourceforge.net/plugins/gx_cabinet#CABINET')
-        # append_unit0(0, 'http://gareus.org/oss/lv2/convoLV2#Mono')
-        # og.append_unit(0, 'http://calf.sourceforge.net/plugins/Equalizer5Band')
-        og.append_unit(0, 'http://drobilla.net/plugins/mda/DubDelay')
-        og.set_port_value(0, 2, 0, 0.2)
-
-        og.append_unit(0, 'http://calf.sourceforge.net/plugins/Reverb')
-        
-        og.setup['racks'][0]['units'][0]['input_connections'][0].append('system:capture_2')
-
-
-        og.append_unit(0, 'http://plugin.org.uk/swh-plugins/sc4')
-        og.setup['racks'][0]['units'][-1]['output_connections'][0].append('system:playback_1')
-        og.setup['racks'][0]['units'][-1]['output_connections'][1].append('system:playback_2')
-        
-        og.rewire()
-        
 except KeyError as e:
     logging.error('KeyError: {}'.format(e))
 except:
