@@ -10,6 +10,12 @@
         <div class="rack">
             <span>Choose a port to connect to:</span>
             <table>
+              <tr>
+                <td>name</td>
+                <td>type</td>
+                <td>is input</td>
+                <td>is output</td>
+              </tr>
                 % index = 0
                 % for port in ports:
                 <tr>
