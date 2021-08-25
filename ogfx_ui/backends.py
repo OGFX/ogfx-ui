@@ -252,11 +252,14 @@ class jalv:
                             stdin=subprocess.PIPE)
                     self.subprocess_map[unit['uuid']] = (p1, p2)
                     
-                    while not self.rewire_port_with_prefix_exists(switch_unit_jack_client_name(unit)):
+                    while (not self.rewire_port_with_prefix_exists(switch_unit_jack_client_name(unit))) and (p1.returncode == None):
+                        p1.poll()
                         time.sleep(0.01)
-                    while not self.rewire_port_with_prefix_exists(unit_jack_client_name(unit)):
+                    logging.debug('ogfx_jack_switch ports appeared...')
+                    while (not self.rewire_port_with_prefix_exists(unit_jack_client_name(unit))) and (p2.returncode == None):
+                        p2.poll()
                         time.sleep(0.01)
-                        
+                    logging.debug('jalv ports appeared...') 
                     # self.subprocess_map[unit['uuid']][0].stdin.write('1\n'.encode('utf-8'))
                     # self.subprocess_map[unit['uuid']][0].stdin.flush()
         self.rewire_remove_leftover_subprocesses()
