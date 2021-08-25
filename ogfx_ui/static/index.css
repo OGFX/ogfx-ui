@@ -135,4 +135,7 @@ a {
     margin-top: 0.0em;
 }
 
+input[type=number] {
+    width: 4em;
+}
 

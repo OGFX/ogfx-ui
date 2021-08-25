@@ -80,7 +80,7 @@
               <details>
                 <summary class="unit-info">
                   <span>{{rack_index}}.{{unit_index}}._:</span>
-                  <a href="/cc/{{rack_index}}/{{unit_index}}">--:--</a>
+                  <input title="Midi channel ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">
                   <input class="unit_enable_checkbox" type="checkbox" {{'checked' if unit['enabled'] else ''}} name="unit_enabled_{{rack_index}}_{{unit_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}">
                   <span>{{len(unit['input_audio_ports'])}}:{{len(unit['output_audio_ports'])}}</span>
                   <span>{{unit['name']}}</span>
@@ -114,7 +114,7 @@
                   % for port in unit['input_control_ports']:
                   <div id="port-{{rack_index}}-{{unit_index}}-{{port_index}}">
                     <span>{{rack_index}}.{{unit_index}}.{{port_index}}:</span>
-                    <a href="/cc/{{rack_index}}/{{unit_index}}/{{port_index}}">--:--:lin</a>
+                    <input title="Midi channel ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">
                     <span>{{port['name']}} [{{port['range'][1]}} {{port['range'][0]}} {{port['range'][2]}}]</span>
                     <div class="control-input-container">
                       <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off" name="input_control_port_value_slider_{{rack_index}}_{{unit_index}}_{{port_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}" data-port-index="{{port_index}}">

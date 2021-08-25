@@ -61,7 +61,8 @@ class jalv:
                     num_output_ports += 1
             if num_input_ports == 0 or num_output_ports == 0:
                 continue
-            logging.debug('{} ({})'.format(p['name'], p['uri']))
+            logging.debug('{} ({}): in: {}, out: {}'.format(p['name'], p['uri'], num_input_ports, num_output_ports))
+            logging.debug('{}', p)
             self.units_map[p['uri']] = {'name': p['name'], 'data': p }
 
         
