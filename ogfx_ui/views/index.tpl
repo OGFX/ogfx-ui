@@ -114,7 +114,10 @@
                   % for port in unit['input_control_ports']:
                   <div id="port-{{rack_index}}-{{unit_index}}-{{port_index}}">
                     <span>{{rack_index}}.{{unit_index}}.{{port_index}}:</span>
-                    <input title="Midi channel ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1"> <input ti<input title="Minimum value" type="number" min="{{port['range'][1]}}" value="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.01"> -> <input title="Maximum value" type="number" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][2]}}" step="0.01">
+                    <details>
+                        <summary><input title="Midi channel ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1"></summary>
+                        <input title="Minimum value" type="number" min="{{port['range'][1]}}" value="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.01"> -> <input title="Maximum value" type="number" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][2]}}" step="0.01">
+                    </details>
                     <span>{{port['name']}} [{{port['range'][1]}} {{port['range'][0]}} {{port['range'][2]}}]</span>
                     <div class="control-input-container">
                       <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off" name="input_control_port_value_slider_{{rack_index}}_{{unit_index}}_{{port_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}" data-port-index="{{port_index}}">
