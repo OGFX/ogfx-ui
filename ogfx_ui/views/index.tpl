@@ -80,7 +80,7 @@
               <details>
                 <summary class="unit-info">
                   <span>{{rack_index}}.{{unit_index}}._:</span>
-                  <input title="Midi channel ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">
+                  <input title="Midi channel ([0..15], -1 for disabled)" type="number" min="-1" max="15" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">
                   <input class="unit_enable_checkbox" type="checkbox" {{'checked' if unit['enabled'] else ''}} name="unit_enabled_{{rack_index}}_{{unit_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}">
                   <span>{{len(unit['input_audio_ports'])}}:{{len(unit['output_audio_ports'])}}</span>
                   <span>{{unit['name']}}</span>
@@ -115,7 +115,7 @@
                   <div id="port-{{rack_index}}-{{unit_index}}-{{port_index}}">
                     <span>{{rack_index}}.{{unit_index}}.{{port_index}}:</span>
                     <details>
-                        <summary><input title="Midi channel ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1"></summary>
+                        <summary><input title="Midi channel ([0..15], -1 for disabled)" type="number" min="-1" max="15" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1"></summary>
                         <input title="Minimum value" type="number" min="{{port['range'][1]}}" value="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.01"> -> <input title="Maximum value" type="number" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][2]}}" step="0.01">
                     </details>
                     <span>{{port['name']}} [{{port['range'][1]}} {{port['range'][0]}} {{port['range'][2]}}]</span>
