@@ -173,6 +173,14 @@ a {
 
 input[type=number] {
     width: 4em;
-    /* border-radius: 0.5em; */
+    border-radius: 0.4em;
+    border-color: #000000;
+    border-width: 1px;
 }
 
+input[type=text] {
+    width: 4em;
+    border-radius: 0.4em;
+    border-color: #000000;
+    border-width: 1px;
+}
