@@ -40,21 +40,22 @@ class jalv:
                     pass
         
     def midi_manager(self):
-      logging.debug('running ogfx_jack_midi_tool process...')
-      p1 = subprocess.Popen(
-              ['stdbuf', '-i0', '-o0', '-e0', 'ogfx_jack_midi_tool'],
-              stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-      while not self.quit_threads:
-        p1.stdin.write('\n'.encode('utf-8'))
-        p1.stdin.flush()
-        line = p1.stdout.readline().decode('utf-8')
-        if len(line) > 0 and line != '\n':
-          logging.debug('got a line: {}'.format(line))
-        time.sleep(0.001)
-      logging.debug('telling ogfx_jack_midi_tool process to quit...')
-      p1.stdin.write('quit\n'.encode('utf-8'))
-      logging.debug('midi_manager done.')
-      p1.wait()
+        logging.debug('running ogfx_jack_midi_tool process...')
+        p1 = subprocess.Popen(
+            ['stdbuf', '-i0', '-o0', '-e0', 'ogfx_jack_midi_tool'],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        while not self.quit_threads:
+            p1.stdin.write('\n'.encode('utf-8'))
+            p1.stdin.flush()
+            line = p1.stdout.readline().decode('utf-8')
+            if len(line) > 0 and line != '\n':
+                logging.debug('got a line: {}'.format(line))
+            time.sleep(0.001)
+        logging.debug('telling ogfx_jack_midi_tool process to quit...')
+        p1.stdin.write('quit\n'.encode('utf-8'))
+        logging.debug('waiting for ogfx_jack_midi_tool to exit...')
+        p1.wait()
+        logging.debug('midi_manager done.')
 
     def start_threads(self):
         logging.info('running connections manager thread...')
@@ -379,6 +380,9 @@ class jalv:
                         for outp in outputs:
                             self.connections.append(('{}:out0{}'.format(switch_unit_jack_client_name(unit), (channel % len(unit['output_audio_ports']))), outp))
                             self.connections.append(('{}:{}'.format(unit_jack_client_name(unit), unit['output_audio_ports'][channel % len(unit['output_audio_ports'])]['symbol']), outp))
+
+            for connection in rack['input_midi_connections']:
+                self.connections.append(('ogfx_jack_midi_tool:in0', connection))
 
             logging.debug('linear connections...')
             for unit_index in range(1, len(units)):
