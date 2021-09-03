@@ -7,8 +7,8 @@
         <span>rack-{{rack_index}}</span>
     </summary>
     <div class="operations">
-        <a title="move up" href="move_rack_up/{{rack_index}}">▲</a>
-        <a title="move down" href="move_rack_down/{{rack_index}}">▼</a>
+        <a title="move up" href="move_rack_up/{{rack_index}}">up</a>
+        <a title="move down" href="move_rack_down/{{rack_index}}">dwn</a>
         <a title="save" href="save/{{rack_index}}">sv</a>
         <a title="save as..." href="saveas/{{rack_index}}">(as)</a>
         <a title="load" href="load/{{rack_index}}">ld</a>
@@ -20,15 +20,22 @@
     <div class="connections-info">
         % channel_index = 0
         % for channel in rack['input_connections']:
-        <div>input channel-{{channel_index}}:</div>
+          <div>input channel-{{channel_index}}:</div>
+          % connection_index = 0
+          % for connection in channel:
+            <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/input/{{channel_index}}/{{connection_index}}">disconnect</a></div>
+            % connection_index = connection_index + 1
+          % end
+          <div><a class="operations" href="connect/{{rack_index}}/input/{{channel_index}}">connect</a></div>
+          % channel_index = channel_index + 1
+        % end
+        <div>midi-input:</div>
         % connection_index = 0
-        % for connection in channel:
-        <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/input/{{channel_index}}/{{connection_index}}">disconnect</a></div>
-        % connection_index = connection_index + 1
+        % for connection in rack['input_midi_connections']:
+          <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/midi-input/{{connection_index}}">disconnect</a></div>
+          % connection_index = connection_index + 1
         % end
-        <div><a class="operations" href="connect/{{rack_index}}/input/{{channel_index}}">connect</a></div>
-        % channel_index = channel_index + 1
-        % end
+        <div><a class="operations" href="connect/{{rack_index}}/midi-input">connect</a></div>
     </div>
     <div class="add-unit">
         <a href="add/{{rack_index}}/0">add unit</a>

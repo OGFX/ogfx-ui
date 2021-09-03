@@ -39,10 +39,30 @@ class jalv:
                 except:
                     pass
         
+    def midi_manager(self):
+      logging.debug('running ogfx_jack_midi_tool process...')
+      p1 = subprocess.Popen(
+              ['stdbuf', '-i0', '-o0', '-e0', 'ogfx_jack_midi_tool'],
+              stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+      while not self.quit_threads:
+        p1.stdin.write('\n'.encode('utf-8'))
+        p1.stdin.flush()
+        line = p1.stdout.readline().decode('utf-8')
+        if len(line) > 0 and line != '\n':
+          logging.debug('got a line: {}'.format(line))
+        time.sleep(0.001)
+      logging.debug('telling ogfx_jack_midi_tool process to quit...')
+      p1.stdin.write('quit\n'.encode('utf-8'))
+      logging.debug('midi_manager done.')
+      p1.wait()
+
     def start_threads(self):
         logging.info('running connections manager thread...')
         self.connections_manager_thread = threading.Thread(None, self.connections_manager)
         self.connections_manager_thread.start()
+        logging.info('running midi manager thread...')
+        self.midi_manager_thread = threading.Thread(None, self.midi_manager)
+        self.midi_manager_thread.start()
 
     def stop_threads(self):
         self.quit_threads = True
@@ -73,7 +93,7 @@ class jalv:
 
     
     def add_rack(self, rack_index):
-        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]]})
+        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]], 'input_midi_connections': [[]]})
         self.rewire()
 
     def delete_rack(self, rack_index):
@@ -185,15 +205,21 @@ class jalv:
         self.add_unit(rack_index, len(self.setup['racks'][rack_index]['units']), uri)
         # add_unit calls rewire()
 
-    def find_jack_audio_ports(self, direction):
+    def find_jack_ports(self, port_type, direction):
         output = subprocess.check_output(['ogfx_jack_list_ports'])
         all_ports = json.loads(output)
         ports = []
         for port in all_ports:
-            if port['type'] == '32 bit float mono audio' and direction == direction and port[direction] == 1:
+            if port['type'] == port_type and direction == direction and port[direction] == 1:
                 ports.append(port)
         return ports
+
+    def find_jack_audio_ports(self, direction):
+        return self.find_jack_ports('32 bit float mono audio', direction)
     
+    def find_jack_midi_ports(self, direction):
+        return self.find_jack_ports('8 bit raw midi', direction)
+
     def connect_jack_ports(self, port1, port2):
         try:
             logging.debug('connecting {} -> {}'.format(port1, port2))

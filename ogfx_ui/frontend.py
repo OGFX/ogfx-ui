@@ -76,7 +76,30 @@ def disconnect(rack_index, channel_index, direction, connection_index):
     og.rewire()
     bottle.redirect('/#unit-{}'.format(rack_index))
 
-# UNITS 
+# MIDI input connection for rack
+
+@bottle.route('/connect2/<rack_index:int>/midi-input/<port_name>')
+def connect2(rack_index, port_name):
+    og.setup['racks'][rack_index]['input_midi_connections'].append(port_name)
+    og.rewire()
+    bottle.redirect('/#rack-{}'.format(rack_index))
+
+
+
+@bottle.route('/connect/<rack_index:int>/midi-input')
+@bottle.view('connect')
+def connect(rack_index):
+    ports = og.find_jack_midi_ports('output')
+    logging.debug('{}'.format(ports))
+    return dict({'ports': ports, 'remaining_path': '/{}/midi-input'.format(rack_index) })
+
+@bottle.route('/disconnect/<rack_index:int>/midi-input/<connection_index:int>')
+def disconnect(rack_index, connection_index):
+    del og.setup['racks'][rack_index]['input_midi_connections'][connection_index]
+    og.rewire()
+    bottle.redirect('/#unit-{}'.format(rack_index))
+
+# UNITS
 
 @bottle.route('/add/<rack_index:int>/<unit_index:int>/<uri>')
 def add_unit(rack_index, unit_index, uri):

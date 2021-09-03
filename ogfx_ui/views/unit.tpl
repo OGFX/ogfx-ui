@@ -8,8 +8,8 @@
             <span>{{unit['name']}}</span>
         </summary>
         <div class="operations">
-            <a href="move_unit_up/{{rack_index}}/{{unit_index}}">▲</a>
-            <a href="move_unit_down/{{rack_index}}/{{unit_index}}">▼</a>
+            <a href="move_unit_up/{{rack_index}}/{{unit_index}}">up</a>
+            <a href="move_unit_down/{{rack_index}}/{{unit_index}}">dwn</a>
             <a href="save/{{rack_index}}/{{unit_index}}">sv</a>
             <a href="saveas/{{rack_index}}/{{unit_index}}">(as)</a>
             <a href="load/{{rack_index}}/{{unit_index}}">ld</a>
