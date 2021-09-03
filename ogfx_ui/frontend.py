@@ -74,7 +74,7 @@ def connect(rack_index, channel_index, direction):
 def disconnect(rack_index, channel_index, direction, connection_index):
     del og.setup['racks'][rack_index][direction + '_connections'][channel_index][connection_index]
     og.rewire()
-    bottle.redirect('/#unit-{}'.format(rack_index))
+    bottle.redirect('/#rack-{}'.format(rack_index))
 
 # MIDI input connection for rack
 
@@ -97,7 +97,7 @@ def connect(rack_index):
 def disconnect(rack_index, connection_index):
     del og.setup['racks'][rack_index]['input_midi_connections'][connection_index]
     og.rewire()
-    bottle.redirect('/#unit-{}'.format(rack_index))
+    bottle.redirect('/#rack-{}'.format(rack_index))
 
 # UNITS
 
