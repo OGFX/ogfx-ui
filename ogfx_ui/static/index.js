@@ -39,7 +39,7 @@ document.addEventListener("readystatechange", event => {
             sliders[index].oninput = sliderChanged;
         }
 
-        var unit_checkboxes = document.getElementsByClassName("unit_enable_checkbox");
+        var unit_checkboxes = document.getElementsByClassName("unit-enable-checkbox");
         for (var index = 0; index < unit_checkboxes.length; ++index) {
             unit_checkboxes[index].oninput = unitEnableChanged;
         }

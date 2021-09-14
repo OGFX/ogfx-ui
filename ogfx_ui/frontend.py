@@ -84,8 +84,6 @@ def connect2(rack_index, port_name):
     og.rewire()
     bottle.redirect('/#rack-{}'.format(rack_index))
 
-
-
 @bottle.route('/connect/<rack_index:int>/midi-input')
 @bottle.view('connect')
 def connect(rack_index):
