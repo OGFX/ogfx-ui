@@ -21,6 +21,7 @@ class jalv:
 
         self.subprocess_map = dict()
         self.connections = []
+        self.lazy_connections = []
 
         self.create_setup()
 
@@ -29,11 +30,11 @@ class jalv:
     def connections_manager(self):
         while not self.quit_threads:
             time.sleep(1)
-            continue
-            logging.debug('managing connections...')
-            for connection in self.connections:
+            # continue
+            # logging.debug('managing connections...')
+            for connection in self.lazy_connections:
                 try:
-                    logging.debug('connecting {} {}'.format(connection[0], connection[1]))
+                    logging.debug('connections_manager connecting {} {}'.format(connection[0], connection[1]))
                     # jack_client.connect(connection[0], connection[1])
                     subprocess.check_call(['jack_connect', connection[0], connection[1]])
                 except:
@@ -305,6 +306,7 @@ class jalv:
         self.rewire_manage_subprocesses()
         old_connections = self.connections
         self.connections = []
+        self.lazy_connections = []
         for rack_index in range(0, len(self.setup['racks'])):
             rack = self.setup['racks'][rack_index]
             logging.debug('rewiring rack...')
@@ -382,7 +384,7 @@ class jalv:
                             self.connections.append(('{}:{}'.format(unit_jack_client_name(unit), unit['output_audio_ports'][channel % len(unit['output_audio_ports'])]['symbol']), outp))
 
             for connection in rack['input_midi_connections']:
-                self.connections.append(('ogfx_jack_midi_tool:in0', connection))
+                self.lazy_connections.append(('ogfx_jack_midi_tool:in0', connection))
 
             logging.debug('linear connections...')
             for unit_index in range(1, len(units)):
