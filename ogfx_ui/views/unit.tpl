@@ -1,4 +1,4 @@
-<div class="unit" id="unit-{{rack_index}}-{{unit_index}}">
+<div class="unit rounded-shadow-box" id="unit-{{rack_index}}-{{unit_index}}">
     <details open="true">
         <summary class="unit-info">
             <span>{{rack_index}}.{{unit_index}}._:</span>
@@ -7,15 +7,15 @@
             <span>{{len(unit['input_audio_ports'])}}:{{len(unit['output_audio_ports'])}}</span>
             <span>{{unit['name']}}</span>
         </summary>
-        <div class="operations">
+        <div class="indent">
             <a href="move_unit_up/{{rack_index}}/{{unit_index}}">up</a>
             <a href="move_unit_down/{{rack_index}}/{{unit_index}}">dwn</a>
             <a href="save/{{rack_index}}/{{unit_index}}">sv</a>
-            <a href="saveas/{{rack_index}}/{{unit_index}}">(as)</a>
+            <a href="saveas/{{rack_index}}/{{unit_index}}">(as...)</a>
             <a href="load/{{rack_index}}/{{unit_index}}">ld</a>
             <a href="reset/{{rack_index}}/{{unit_index}}">rst</a>
             <a href="delete/{{rack_index}}/{{unit_index}}">rm</a>
-            <a href="upload/{{rack_index}}/{{unit_index}}">ul</a>
+            <a href="upload/{{rack_index}}/{{unit_index}}">ul...</a>
             <a href="download/{{rack_index}}/{{unit_index}}" download="ogfx-unit.json">dl</a>
         </div>
         <div class="connections-info">
@@ -24,10 +24,10 @@
                 <div>input channel-{{channel_index}}:</div>
                 % connection_index = 0
                 % for connection in channel:
-                    <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/input/{{channel_index}}/{{connection_index}}">disconnect</a></div>
+                    <div class="indent"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/input/{{channel_index}}/{{connection_index}}">disconnect</a></div>
                     % connection_index = connection_index + 1
                 % end
-                <div><a class="operations" href="connect/{{rack_index}}/{{unit_index}}/input/{{channel_index}}">connect</a></div>
+                <div><a class="indent" href="connect/{{rack_index}}/{{unit_index}}/input/{{channel_index}}">connect...</a></div>
                 % channel_index = channel_index + 1
             % end
         </div>
@@ -38,10 +38,10 @@
                 <div>output channel-{{channel_index}}:</div>
                 % connection_index = 0
                 % for connection in channel:
-                    <div class="operations"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/output/{{channel_index}}/{{connection_index}}">disconnect</a></div>
+                    <div class="indent"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/output/{{channel_index}}/{{connection_index}}">disconnect</a></div>
                     % connection_index = connection_index + 1
                 % end
-                <div><a class="operations" href="connect/{{rack_index}}/{{unit_index}}/output/{{channel_index}}">connect</a></div>
+                <div><a class="indent" href="connect/{{rack_index}}/{{unit_index}}/output/{{channel_index}}">connect...</a></div>
                 % channel_index = channel_index + 1
             % end
         </div>

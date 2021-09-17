@@ -1,7 +1,7 @@
 <div class="port-info">
   % port_index = 0
   % for port in unit['input_control_ports']:
-    <details class="port">
+    <details class="port rounded-shadow-box">
       <summary id="port-{{rack_index}}-{{unit_index}}-{{port_index}}">
         <div class="port-summary-wrap">
           <div class="port-summary">
