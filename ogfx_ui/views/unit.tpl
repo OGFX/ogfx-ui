@@ -19,31 +19,37 @@
             <a href="download/{{rack_index}}/{{unit_index}}" download="ogfx-unit.json">dl</a>
         </div>
         <div class="connections-info">
-            % channel_index = 0
-            % for channel in unit['input_connections']:
-                <div>input channel-{{channel_index}}:</div>
-                % connection_index = 0
-                % for connection in channel:
-                    <div class="indent"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/input/{{channel_index}}/{{connection_index}}">disconnect</a></div>
-                    % connection_index = connection_index + 1
+            <details>
+                <summary>extra input connections</summary>
+                % channel_index = 0
+                % for channel in unit['input_connections']:
+                    <div>input channel-{{channel_index}}:</div>
+                    % connection_index = 0
+                    % for connection in channel:
+                        <div class="indent"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/input/{{channel_index}}/{{connection_index}}">disconnect</a></div>
+                        % connection_index = connection_index + 1
+                    % end
+                    <div><a class="indent" href="connect/{{rack_index}}/{{unit_index}}/input/{{channel_index}}">connect...</a></div>
+                    % channel_index = channel_index + 1
                 % end
-                <div><a class="indent" href="connect/{{rack_index}}/{{unit_index}}/input/{{channel_index}}">connect...</a></div>
-                % channel_index = channel_index + 1
-            % end
+            </details>
         </div>
         % include('port.tpl', unit=unit)
         <div class="connections-info">
-            % channel_index = 0
-            % for channel in unit['output_connections']:
-                <div>output channel-{{channel_index}}:</div>
-                % connection_index = 0
-                % for connection in channel:
-                    <div class="indent"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/output/{{channel_index}}/{{connection_index}}">disconnect</a></div>
-                    % connection_index = connection_index + 1
+            <details>
+                <summary>extra output connections</summary>
+                % channel_index = 0
+                % for channel in unit['output_connections']:
+                    <div>output channel-{{channel_index}}:</div>
+                    % connection_index = 0
+                    % for connection in channel:
+                        <div class="indent"><span>{{connection}}</span><a class="operations" href="disconnect/{{rack_index}}/{{unit_index}}/output/{{channel_index}}/{{connection_index}}">disconnect</a></div>
+                        % connection_index = connection_index + 1
+                    % end
+                    <div><a class="indent" href="connect/{{rack_index}}/{{unit_index}}/output/{{channel_index}}">connect...</a></div>
+                    % channel_index = channel_index + 1
                 % end
-                <div><a class="indent" href="connect/{{rack_index}}/{{unit_index}}/output/{{channel_index}}">connect...</a></div>
-                % channel_index = channel_index + 1
-            % end
+            </details>
         </div>
     </details>
 </div>
