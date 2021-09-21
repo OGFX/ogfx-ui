@@ -18,6 +18,7 @@
             <a title="upload" href="upload/{{rack_index}}">ul...</a>
             <a title="download" href="download/{{rack_index}}" download="ogfx-rack.json">dl</a>
         </div>
+
         <div class="connections-info">
             % channel_index = 0
             % for channel in rack['input_connections']:

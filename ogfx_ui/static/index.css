@@ -1,11 +1,4 @@
 
-.color-primary-0 { color: #29526D }
-.color-primary-1 { color: #708FA3 }
-.color-primary-2 { color: #486F88 }
-.color-primary-3 { color: #123852 }
-.color-primary-4 { color: #032236 }
-
-
 body {
     background-color: #7697a0;
     padding: 0.0em;
@@ -62,19 +55,19 @@ a {
 }
 
 .port-summary {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .port-summary-wrap {
-  display: inline-block;
-  width: calc(100% - 2em);
+    display: inline-block;
+    width: calc(100% - 2em);
 }
 
 .port-summary-first-line {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .port {
@@ -117,7 +110,7 @@ a {
 }
 
 .input-control-port-value-slider {
-  display: block;
+    display: block;
 }
 
 .indent {
