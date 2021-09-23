@@ -54,8 +54,10 @@ class jalv:
             time.sleep(0.001)
         logging.debug('telling ogfx_jack_midi_tool process to quit...')
         p1.stdin.write('quit\n'.encode('utf-8'))
+        p1.stdin.flush()
         logging.debug('waiting for ogfx_jack_midi_tool to exit...')
-        p1.wait()
+        while not p1.poll():
+            system.sleep(0.1)
         logging.debug('midi_manager done.')
 
     def start_threads(self):
