@@ -5,12 +5,16 @@ import uuid
 import time
 import threading
 import traceback
+import signal
 
 def unit_jack_client_name(unit):
     return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
 
 def switch_unit_jack_client_name(unit):
     return '{}-{}-{}'.format(unit['uuid'][0:8], 'switch', unit['name'])
+
+def ignore_sigint():
+  signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 class jalv:
     def __init__(self, lv2_world):
@@ -42,24 +46,27 @@ class jalv:
         
     def midi_manager(self):
         logging.debug('running ogfx_jack_midi_tool process...')
-        p1 = subprocess.Popen(
-            ['stdbuf', '-i0', '-o0', '-e0', 'ogfx_jack_midi_tool'],
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        while not self.quit_threads:
-            p1.stdin.write('\n'.encode('utf-8'))
+        with subprocess.Popen(['ogfx_jack_midi_tool'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, preexec_fn=ignore_sigint) as p1:
+            while not self.quit_threads:
+                time.sleep(0.001)
+                # continue
+                p1.stdin.write('\n'.encode('utf-8'))
+                p1.stdin.flush()
+                line = p1.stdout.readline().decode('utf-8')
+                if len(line) > 0 and line != '\n':
+                    logging.debug('got a line: {}'.format(line))
+            logging.debug('telling ogfx_jack_midi_tool process to quit...')
+            p1.stdin.write('quit\n'.encode('utf-8'))
+            # p1.stdin.close()
+            # p1.stdout.close()
             p1.stdin.flush()
-            line = p1.stdout.readline().decode('utf-8')
-            if len(line) > 0 and line != '\n':
-                logging.debug('got a line: {}'.format(line))
-            time.sleep(0.001)
-        logging.debug('telling ogfx_jack_midi_tool process to quit...')
-        p1.stdin.write('quit\n'.encode('utf-8'))
-        p1.stdin.flush()
-        logging.debug('waiting for ogfx_jack_midi_tool to exit...')
-        while not p1.poll():
-            system.sleep(0.1)
-        logging.debug('midi_manager done.')
-
+            logging.debug('waiting for ogfx_jack_midi_tool to exit...')
+            while p1.poll() == None:
+                logging.debug('still waiting...')
+                time.sleep(0.1)
+            p1.kill()
+            logging.debug('midi_manager done.')
+    
     def start_threads(self):
         logging.info('running connections manager thread...')
         self.connections_manager_thread = threading.Thread(None, self.connections_manager)
@@ -69,7 +76,11 @@ class jalv:
         self.midi_manager_thread.start()
 
     def stop_threads(self):
+        logging.info('telling threads to quit...')
         self.quit_threads = True
+        self.midi_manager_thread.join()
+        self.connections_manager_thread.join()
+        logging.info('threads joined. done.')
 
     def create_units_map(self):
         self.units_map = dict()
@@ -275,11 +286,11 @@ class jalv:
                     time.sleep(0.01)
                     p1 = subprocess.Popen(
                             ['stdbuf', '-i0', '-o0', '-e0', 'ogfx_jack_switch', '-n', switch_unit_jack_client_name(unit)], 
-                            stdin=subprocess.PIPE) 
+                            stdin=subprocess.PIPE, preexec_fn=ignore_sigint) 
                     time.sleep(0.01)
                     p2 = subprocess.Popen(
                             ['stdbuf', '-i0', '-o0', '-e0', 'jalv', '-n', unit_jack_client_name(unit), unit['uri']], 
-                            stdin=subprocess.PIPE)
+                            stdin=subprocess.PIPE, preexec_fn=ignore_sigint)
                     self.subprocess_map[unit['uuid']] = (p1, p2)
                     
                     while (not self.rewire_port_with_prefix_exists(switch_unit_jack_client_name(unit))) and (p1.returncode == None):
