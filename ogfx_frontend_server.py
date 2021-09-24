@@ -60,8 +60,7 @@ try:
 except KeyError as e:
     logging.error('KeyError: {}'.format(e))
 except:
-    logging.error('ERRROR!!!!')
-    logging.error('Something unspeakable happened!')
+    logging.error('ERRROR!!!! Something unspeakable happened! Traceback follows:')
     traceback.print_exc()
 
 ogfx_ui.run(og)
