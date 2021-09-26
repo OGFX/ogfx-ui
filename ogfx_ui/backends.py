@@ -57,8 +57,6 @@ class jalv:
                     logging.debug('got a line: {}'.format(line))
             logging.debug('telling ogfx_jack_midi_tool process to quit...')
             p1.stdin.write('quit\n'.encode('utf-8'))
-            # p1.stdin.close()
-            # p1.stdout.close()
             p1.stdin.flush()
             logging.debug('waiting for ogfx_jack_midi_tool to exit...')
             while p1.poll() == None:
