@@ -2,8 +2,7 @@
     <details open="true">
         <summary class="unit-info">
             <span>{{rack_index}}.{{unit_index}}._:</span>
-            <input title="Midi channel ([0..15], -1 for disabled)" type="number" min="-1" max="15" value="-1">:<input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1">
-            <input class="unit-enable-checkbox" type="checkbox" {{'checked' if unit['enabled'] else ''}} name="unit_enabled_{{rack_index}}_{{unit_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}">
+            <input class="unit-enable-checkbox" title="Unit enabled" type="checkbox" {{'checked' if unit['enabled'] else ''}} name="unit_enabled_{{rack_index}}_{{unit_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}">
             <span>{{len(unit['input_audio_ports'])}}:{{len(unit['output_audio_ports'])}}</span>
             <span>{{unit['name']}}</span>
         </summary>
@@ -18,6 +17,12 @@
             <a href="upload/{{rack_index}}/{{unit_index}}">ul...</a>
             <a href="download/{{rack_index}}/{{unit_index}}" download="ogfx-unit.json">dl</a>
         </div>
+        <span>
+            MIDI CC:
+            <input name="unit_midi_cc_enabled_{{rack_index}}_{{unit_index}}" title="Midi CC enabled" type="checkbox" {{'checked' if unit['cc']['enabled'] else ''}}>
+            <input name="unit_midi_cc_channel_{{rack_index}}_{{unit_index}}" title="Midi channel (0..15)" type="number" min="0" max="15" value="{{unit['cc']['midi_channel']}}">
+            <input title="Midi CC (0..127)" type="number" min="0" max="127" value="{{unit['cc']['midi_cc']}}">
+        </span>
         <div class="connections-info">
             <details>
                 <summary>extra input connections</summary>
