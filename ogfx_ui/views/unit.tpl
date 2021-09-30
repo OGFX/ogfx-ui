@@ -20,8 +20,8 @@
         <span>
             MIDI CC:
             <input name="unit_midi_cc_enabled_{{rack_index}}_{{unit_index}}" title="Midi CC enabled" type="checkbox" {{'checked' if unit['cc']['enabled'] else ''}}>
-            <input name="unit_midi_cc_channel_{{rack_index}}_{{unit_index}}" title="Midi channel (0..15)" type="number" min="0" max="15" value="{{unit['cc']['midi_channel']}}">
-            <input title="Midi CC (0..127)" type="number" min="0" max="127" value="{{unit['cc']['midi_cc']}}">
+            <input class="midi-cc-2em" name="unit_midi_cc_channel_{{rack_index}}_{{unit_index}}" title="Midi channel (0..15)" type="number" min="0" max="15" value="{{unit['cc']['midi_channel']}}">
+            <input class="midi-cc-3em" title="Midi CC (0..127)" type="number" min="0" max="127" value="{{unit['cc']['midi_cc']}}">
         </span>
         <div class="connections-info">
             <details>

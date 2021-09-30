@@ -18,10 +18,10 @@
           </div>
         </div>
       </summary>
-      <label>Ch: <input title="Midi channel ([0..15], -1 for disabled)" type="number" min="-1" max="15" value="-1"></label>
-      <label>CC: <input title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1"></label>
-      <label>Min: <input title="Minimum value" type="number" min="{{port['range'][1]}}" value="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.01"></label>
-      <label>Max: <input title="Maximum value" type="number" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][2]}}" step="0.01"></label>
+      <label>Ch: <input class="midi-cc" title="Midi channel ([0..15], -1 for disabled)" type="number" min="-1" max="15" value="-1"></label>
+      <label>CC: <input class="midi-cc" title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1"></label>
+      <label>Min: <input class="midi-cc-float" title="Minimum value" type="number" min="{{port['range'][1]}}" value="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.01"></label>
+      <label>Max: <input class="midi-cc-float" title="Maximum value" type="number" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][2]}}" step="0.01"></label>
     </details>
 
     % port_index = port_index + 1

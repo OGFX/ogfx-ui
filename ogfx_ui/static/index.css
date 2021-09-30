@@ -117,6 +117,28 @@ a {
     margin-left: 1.0em;
 }
 
+.midi-cc-float {
+    width: 6em;
+    border-radius: 0.4em;
+    border-color: #000000;
+    border-width: 1px;
+}
+
+.midi-cc-2em {
+    width: 3em;
+    border-radius: 0.4em;
+    border-color: #000000;
+    border-width: 1px;
+}
+
+.midi-cc-3em {
+    width: 4em;
+    border-radius: 0.4em;
+    border-color: #000000;
+    border-width: 1px;
+}
+
+/*
 input[type=number] {
     width: 6em;
     border-radius: 0.4em;
@@ -130,3 +152,4 @@ input[type=text] {
     border-color: #000000;
     border-width: 1px;
 }
+*/
