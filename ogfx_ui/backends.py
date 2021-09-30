@@ -30,6 +30,7 @@ class jalv:
         self.create_setup()
 
         self.quit_threads = False
+        self.setup_filename = 'unnamed.ogfx-setup'
 
     def connections_manager(self):
         while not self.quit_threads:
@@ -103,7 +104,7 @@ class jalv:
         
     def create_setup(self):
         logging.info("creating (empty default) setup...")
-        self.setup = {'name': 'new setup', 'racks': [], 'schema-version': 1 }
+        self.setup = {'racks': [], 'schema-version': 1 }
         self.rewire()
 
     

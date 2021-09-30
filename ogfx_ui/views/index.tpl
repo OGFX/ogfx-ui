@@ -10,7 +10,7 @@
 
     <body>
         <div id="top-menu" class="rounded-shadow-box">
-            <span>setup: {{setup['name']}}</span>
+            <span>setup: {{filename}}</span>
             <div class="indent">
                 <a title="save" href="save">sv</a>
                 <a title="save as..." href="saveas">(as)</a>
@@ -23,7 +23,7 @@
 
         <div class="racks-navigation-list rounded-shadow-box">
             <span>racks:</span>
-            <div class="operations">
+            <div class="operations indent">
                 % index = 0
                 % for rack in setup['racks']:
                     <a href="#rack-{{index}}">rack-{{index}}</a>

@@ -234,7 +234,7 @@ def index_post():
 @bottle.route('/')
 @bottle.view('index')
 def index():
-    return dict({'setup': og.setup})
+    return dict({'setup': og.setup,'filename': og.setup_filename})
 
 @bottle.route('/reset')
 def resetet():

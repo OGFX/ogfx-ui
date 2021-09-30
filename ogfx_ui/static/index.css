@@ -11,6 +11,10 @@ a {
     color: #4a707a
 }
 
+span {
+    /* margin: 0.1em; */
+}
+
 .rounded-shadow-box {
     border-radius: 0.5em;
     box-shadow: 0em 0em 0.4em 0.0em #101010;
@@ -117,21 +121,21 @@ a {
     margin-left: 1.0em;
 }
 
-.midi-cc-float {
+.float {
     width: 6em;
     border-radius: 0.4em;
     border-color: #000000;
     border-width: 1px;
 }
 
-.midi-cc-2em {
+.midi-cc-channel {
     width: 3em;
     border-radius: 0.4em;
     border-color: #000000;
     border-width: 1px;
 }
 
-.midi-cc-3em {
+.midi-cc-cc {
     width: 4em;
     border-radius: 0.4em;
     border-color: #000000;
