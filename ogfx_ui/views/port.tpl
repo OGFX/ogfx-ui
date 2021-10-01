@@ -14,16 +14,13 @@
                     <input class="input-control-port-value-slider" type="range" min="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.001" value="{{port['value']}}" autocomplete="off" name="input_control_port_value_slider_{{rack_index}}_{{unit_index}}_{{port_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}" data-port-index="{{port_index}}">
                 </div>
             </div>
-            <details>
-                <summary>
-                    Midi binding
-                </summary>
-                <label>Ch: <input class="midi-cc-channel" title="Midi channel ([0..15], -1 for disabled)" type="number" min="-1" max="15" value="-1"></label>
-                <label>CC: <input class="midi-cc-cc" title="Midi CC ([0..127], -1 for disabled)" type="number" min="-1" max="127" value="-1"></label>
-                <label>Min: <input class="float" title="Minimum value" type="number" min="{{port['range'][1]}}" value="{{port['range'][1]}}" max="{{port['range'][2]}}" step="0.01"></label>
-                <label>Max: <input class="float" title="Maximum value" type="number" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][2]}}" step="0.01"></label>
-            </details>
-
+            <span>
+                MIDI CC:
+                <input name="port-midi-cc-channel-{{rack_index}}-{{unit_index}}-{{port_index}}" class="midi-cc-channel" title="Midi channel ([0..15], -1 for disabled)" type="text" min="-1" max="15" value="-1">
+                <input name="port-midi-cc-cc-{{rack_index}}-{{unit_index}}-{{port_index}}" class="midi-cc-cc" title="Midi CC ([0..127], -1 for disabled)" type="text" min="-1" max="127" value="-1">
+                <input name="port-midi-cc-min-{{rack_index}}-{{unit_index}}-{{port_index}}" class="float" title="Minimum value" type="text" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][1]}}" step="0.01">
+                <input name="port-midi-cc-max-{{rack_index}}-{{unit_index}}-{{port_index}}" class="float" title="Maximum value" type="text" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][2]}}" step="0.01">
+            </span>
         </div>
     % port_index = port_index + 1
   % end
