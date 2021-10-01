@@ -11,9 +11,11 @@ a {
     color: #4a707a
 }
 
+/*
 span {
     margin: 0.5em;
 }
+*/
 
 .rounded-shadow-box {
     border-radius: 0.5em;
