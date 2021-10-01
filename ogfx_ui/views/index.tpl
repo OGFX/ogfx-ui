@@ -12,12 +12,11 @@
         <div id="top-menu" class="rounded-shadow-box">
             <span>setup: {{filename}}</span>
             <div class="indent">
-                <a title="save" href="save">sv</a>
-                <a title="save as..." href="saveas">(as)</a>
-                <a title="load" href="load">ld</a>
+                <a title="save as..." href="saveas">sv..</a>
+                <a title="load" href="load">ld..</a>
                 <a title="reset to defaults" href="reset">rst</a>
-                <a title="upload" href="upload">ul</a>
-                <a title="download" href="download" download="ogfx-setup.json">dl</a>
+                <a title="upload" href="upload">ul..</a>
+                <a title="download" href="download" download="ogfx-setup.json">dl..</a>
             </div>
         </div>
 
