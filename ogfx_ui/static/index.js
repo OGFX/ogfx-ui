@@ -32,7 +32,9 @@ const debounce = (fn, delay) => {
 }
 
 document.addEventListener("readystatechange", event => {
+    console.log('readystatechange...');
     if (event.target.readyState === "complete") {
+        console.log('Setting up listeners...');
         var sliders = document.getElementsByClassName("input-control-port-value-slider");
         for (var index = 0; index < sliders.length; ++index) {
             sliders[index].style.display="block";
@@ -43,6 +45,6 @@ document.addEventListener("readystatechange", event => {
         for (var index = 0; index < unit_checkboxes.length; ++index) {
             unit_checkboxes[index].oninput = unitEnableChanged;
         }
+        console.log("Done setting up listeners.");
     }
-    console.log("test");
 });

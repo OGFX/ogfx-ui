@@ -48,6 +48,7 @@ try:
             json_content = f.read()
             setup = json.loads(json_content)
             og.setup = setup
+            og.setup_filename = arguments.setup
             og.rewire()
     else:
         if os.path.exists(default_setup_file_path):
@@ -55,6 +56,7 @@ try:
                 setup_json_string = f.read()
                 setup = json.loads(setup_json_string)
                 og.setup = setup
+                og.setup_filename = default_setup_file_path
                 og.rewire()
                 
 except KeyError as e:

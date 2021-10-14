@@ -30,6 +30,7 @@ class jalv:
         self.create_setup()
 
         self.quit_threads = False
+        self.setup_filename = 'unnamed.ogfx-setup'
 
     def connections_manager(self):
         while not self.quit_threads:
@@ -101,7 +102,7 @@ class jalv:
         
     def create_setup(self):
         logging.info("creating (empty default) setup...")
-        self.setup = {'name': 'new setup', 'racks': [], 'schema-version': 1 }
+        self.setup = {'racks': [], 'schema-version': 1 }
         self.rewire()
 
     
@@ -145,11 +146,11 @@ class jalv:
 
             if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#ControlPort']:
                 logging.debug('input control port {} {}'.format(port['name'], port['symbol']))
-                control_port = { 'name': port['name'], 'symbol': port['symbol'], 'range': port['range'], 'value': port['range'][0], 'cc': None }
+                control_port = { 'name': port['name'], 'symbol': port['symbol'], 'range': port['range'], 'value': port['range'][0], 'cc': { 'enabled': False, 'midi_channel': 0, 'midi_cc': 0, 'midi_cc_minimum': 0, 'midi_cc_maximum': 127, 'control_minimum': port['range'][1], 'control_maximum': port['range'][2]}}
                 input_control_ports.append(control_port)
 
         unit_uuid = str(uuid.uuid4())
-        self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'input_connections': extra_input_connections, 'output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': None })
+        self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'input_connections': extra_input_connections, 'output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': { 'enabled': False, 'midi_channel': 0, 'midi_cc': 0, 'midi_cc_off': 0, 'midi_cc_on': 127}})
 
         self.rewire()
 
