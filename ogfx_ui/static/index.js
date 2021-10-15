@@ -1,4 +1,5 @@
 function sliderChanged(el) {
+    console.log('sliderChanged');
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "/set_port_value/" + this.dataset.rackIndex + "/" + this.dataset.unitIndex + "/" + this.dataset.portIndex + "/" + this.value, true);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -8,6 +9,7 @@ function sliderChanged(el) {
 };
 
 function unitEnableChanged(event) {
+    console.log('unitEnableChanged');
     console.log(event.target.checked);
     var xhr = new XMLHttpRequest();
     var enabled = 0;
@@ -24,10 +26,10 @@ function unitMidiCCChanged(event) {
     var xhr = new XMLHttpRequest();
     var rack_index = this.parentNode.childNodes[1].dataset.rackIndex;
     var unit_index = this.parentNode.childNodes[1].dataset.unitIndex;
-    var enabled = this.parentNode.childNodes[1].enabled ? 1 : 0;
+    var enabled = this.parentNode.childNodes[1].checked ? 1 : 0;
     var channel = this.parentNode.childNodes[3].value;
     var cc = this.parentNode.childNodes[5].value;
-    xhr.open('GET', '/set_midi_cc/' + rack_index + '/' + unit_index + '/' + enabled + '/' + channel + '/' + cc);
+    xhr.open('GET', '/set_unit_midi_cc/' + rack_index + '/' + unit_index + '/' + enabled + '/' + channel + '/' + cc);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send();
 };

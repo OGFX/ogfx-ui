@@ -26,6 +26,8 @@ class jalv:
         self.subprocess_map = dict()
         self.connections = []
         self.lazy_connections = []
+        self.unit_cc_bindings = {}
+        self.port_cc_bindings = {}
 
         self.create_setup()
 
@@ -56,6 +58,27 @@ class jalv:
                 line = p1.stdout.readline().decode('utf-8')
                 if len(line) > 0 and line != '\n':
                     logging.debug('got a line: {}'.format(line))
+                    pass
+                    parts = line.split()
+                    logging.debug('parts {}'.format(parts))
+                    if not (len(parts) == 3):
+                        continue
+                    the_bytes = [int(parts[0]), int(parts[1]), int(parts[2])]
+                    logging.debug('the bytes: {} {} {}'.format(the_bytes))
+                    if not (parts[0] & 176 == 176):
+                        continue
+                    channel = parts[0] - 176
+                    cc = parts[1]
+                    value = parts[2]
+                    logging.debug('cc: {} {} {}'.format(channel, cc, value))
+                    if not (channel, cc) in self.unit_cc_bindings:
+                        continue
+
+                    bindings = self.unit_cc_bindings[(channel, cc)]
+                    for binding in bindings:
+                        logging.debug('binding {} {}'.format(binding[0], binding[1]))
+                        self.toggle_unit_active(binding[0], binding[1], True if (value > 0) else False)
+
             logging.debug('telling ogfx_jack_midi_tool process to quit...')
             p1.stdin.write('quit\n'.encode('utf-8'))
             p1.stdin.flush()
@@ -96,7 +119,7 @@ class jalv:
             if num_input_ports == 0 or num_output_ports == 0:
                 continue
             logging.debug('{} ({}): in: {}, out: {}'.format(p['name'], p['uri'], num_input_ports, num_output_ports))
-            logging.debug('{}'.format(p))
+            # logging.debug('{}'.format(p))
             self.units_map[p['uri']] = {'name': p['name'], 'data': p }
 
         
@@ -150,7 +173,7 @@ class jalv:
                 input_control_ports.append(control_port)
 
         unit_uuid = str(uuid.uuid4())
-        self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'input_connections': extra_input_connections, 'output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': { 'enabled': False, 'midi_channel': 0, 'midi_cc': 0, 'midi_cc_off': 0, 'midi_cc_on': 127}})
+        self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'input_connections': extra_input_connections, 'output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': { 'enabled': False, 'midi_channel': 0, 'midi_cc': 0}})
 
         self.rewire()
 
@@ -158,6 +181,31 @@ class jalv:
         unit = self.setup['racks'][rack_index]['units'][unit_index]
         del self.setup['racks'][rack_index]['units'][unit_index]
         self.rewire()
+
+    def setup_midi_maps(self):
+        self.unit_cc_bindings = {}
+
+        rack_index = 0
+        for rack in self.setup['racks']:
+            unit_index = 0
+            for unit in rack['units']:
+                if unit['cc']['enabled']:
+                    channel = unit['cc']['channel']
+                    cc = unit['cc']['cc']
+                    if not (channel, cc) in self.unit_cc_bindings:
+                        self.unit_cc_bindings[(channel, cc)] = []
+                    self.unit_cc_bindings[(unit['cc']['channel'], unit['cc']['cc'])].append((rack_index, unit_index))
+
+                unit_index += 1
+            rack_index += 1
+
+        self.port_cc_bindings = {}
+
+    def set_unit_midi_cc(self, rack_index, unit_index, enabled, channel, cc):
+        self.setup['racks'][rack_index]['units'][unit_index]['cc']['enabled'] = enabled
+        self.setup['racks'][rack_index]['units'][unit_index]['cc']['channel'] = channel
+        self.setup['racks'][rack_index]['units'][unit_index]['cc']['cc'] = cc
+        self.setup_midi_maps()
 
     def set_port_value(self, rack_index, unit_index, port_index, value):
         unit = self.setup['racks'][rack_index]['units'][unit_index]
@@ -422,6 +470,7 @@ class jalv:
                         '{}:{}'.format(switch_unit_jack_client_name(unit), 'in{}'.format(current_port)))) 
                        
         self.rewire_update_connections(old_connections, self.connections)
+        self.setup_midi_maps()
 
 
 

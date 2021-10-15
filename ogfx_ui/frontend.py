@@ -99,10 +99,10 @@ def disconnect(rack_index, connection_index):
 
 # UNITS
 
-@bottle.route('/set_midi_cc/<rack_index:int>/<unit_index:int>/<enabled:int>/<channel:int>/<cc:int>')
-def set_midi_cc(rack_index, unit_index, enabled, channel, cc):
+@bottle.route('/set_unit_midi_cc/<rack_index:int>/<unit_index:int>/<enabled:int>/<channel:int>/<cc:int>')
+def set_unit_midi_cc(rack_index, unit_index, enabled, channel, cc):
     logging.debug('set_midi_cc {} {} {} {} {}'.format(rack_index, unit_index, enabled, channel, cc))
-    pass
+    og.set_unit_midi_cc(rack_index, unit_index, (True if enabled > 0 else False), channel, cc)
 
 @bottle.route('/add/<rack_index:int>/<unit_index:int>/<uri>')
 def add_unit(rack_index, unit_index, uri):
