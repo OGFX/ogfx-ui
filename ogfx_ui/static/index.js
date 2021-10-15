@@ -19,6 +19,19 @@ function unitEnableChanged(event) {
     xhr.send();
 };
 
+function unitMidiCCChanged(event) {
+    console.log('unitMidiCCChanged()');
+    var xhr = new XMLHttpRequest();
+    var rack_index = this.parentNode.childNodes[1].dataset.rackIndex;
+    var unit_index = this.parentNode.childNodes[1].dataset.unitIndex;
+    var enabled = this.parentNode.childNodes[1].enabled ? 1 : 0;
+    var channel = this.parentNode.childNodes[3].value;
+    var cc = this.parentNode.childNodes[5].value;
+    xhr.open('GET', '/set_midi_cc/' + rack_index + '/' + unit_index + '/' + enabled + '/' + channel + '/' + cc);
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhr.send();
+};
+
 const debounce = (fn, delay) => {
   let timeOutId;
   return function(...args) {
@@ -45,6 +58,22 @@ document.addEventListener("readystatechange", event => {
         for (var index = 0; index < unit_checkboxes.length; ++index) {
             unit_checkboxes[index].oninput = unitEnableChanged;
         }
+
+        var unit_midi_cc_checkboxes = document.getElementsByClassName('unit-midi-cc-enabled');
+        for (var index = 0; index < unit_midi_cc_checkboxes.length; ++index) {
+            unit_midi_cc_checkboxes[index].oninput = unitMidiCCChanged;
+        }
+
+        var unit_midi_cc_channels = document.getElementsByClassName('unit-midi-cc-channel');
+        for (var index = 0; index < unit_midi_cc_channels.length; ++index) {
+            unit_midi_cc_channels[index].oninput = unitMidiCCChanged;
+        }
+
+        var unit_midi_cc_ccs = document.getElementsByClassName('unit-midi-cc-cc');
+        for (var index = 0; index < unit_midi_cc_ccs.length; ++index) {
+            unit_midi_cc_ccs[index].oninput = unitMidiCCChanged;
+        }
+
         console.log("Done setting up listeners.");
     }
 });
