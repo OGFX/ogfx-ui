@@ -58,18 +58,20 @@ class jalv:
                 line = p1.stdout.readline().decode('utf-8')
                 if len(line) > 0 and line != '\n':
                     logging.debug('got a line: {}'.format(line))
-                    pass
+                    # continue
                     parts = line.split()
-                    logging.debug('parts {}'.format(parts))
+                    logging.debug('parts {} {}'.format(parts, len(parts)))
                     if not (len(parts) == 3):
+                        logging.debug('not len == 3 ????')
                         continue
+                    logging.debug('getting the bytes...')
                     the_bytes = [int(parts[0]), int(parts[1]), int(parts[2])]
-                    logging.debug('the bytes: {} {} {}'.format(the_bytes))
-                    if not (parts[0] & 176 == 176):
+                    logging.debug('the bytes: {}'.format(the_bytes))
+                    if not (the_bytes[0] & 176 == 176):
                         continue
-                    channel = parts[0] - 176
-                    cc = parts[1]
-                    value = parts[2]
+                    channel = the_bytes[0] - 176
+                    cc = the_bytes[1]
+                    value = the_bytes[2]
                     logging.debug('cc: {} {} {}'.format(channel, cc, value))
                     if not (channel, cc) in self.unit_cc_bindings:
                         continue
