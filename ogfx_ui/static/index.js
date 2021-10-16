@@ -47,13 +47,13 @@ const debounce = (fn, delay) => {
 }
 
 function updateView(payload) {
-    console.log('updateView');
+    // console.log('updateView');
     // console.log(payload);
     for (var rack_index = 0; rack_index < payload['racks'].length; ++rack_index) {
+        var rack = payload['racks'][rack_index];
         for (var unit_index = 0; unit_index < payload['racks'][rack_index]['units'].length; ++unit_index) {
-            var unit = payload['racks'][rack_index]['units'][unit_index];
+            var unit = rack['units'][unit_index];
             var unit_enabled_checkbox = document.getElementById('unit-enable-checkbox-' + rack_index + '-' + unit_index);
-            // console.log(unit_enabled_checkbox);
             unit_enabled_checkbox.checked = unit['enabled'];
         }
     }

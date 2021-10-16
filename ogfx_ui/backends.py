@@ -41,9 +41,9 @@ class jalv:
             # logging.debug('managing connections...')
             for connection in self.lazy_connections:
                 try:
-                    logging.debug('connections_manager connecting {} {}'.format(connection[0], connection[1]))
+                    # logging.debug('connections_manager connecting {} {}'.format(connection[0], connection[1]))
                     # jack_client.connect(connection[0], connection[1])
-                    subprocess.check_call(['jack_connect', connection[0], connection[1]])
+                    subprocess.check_output(['jack_connect', connection[0], connection[1]], stderr=subprocess.STDOUT)
                 except:
                     pass
         
@@ -57,16 +57,16 @@ class jalv:
                 p1.stdin.flush()
                 line = p1.stdout.readline().decode('utf-8')
                 if len(line) > 0 and line != '\n':
-                    logging.debug('got a line: {}'.format(line))
+                    # logging.debug('got a line: {}'.format(line))
                     # continue
                     parts = line.split()
-                    logging.debug('parts {} {}'.format(parts, len(parts)))
+                    # logging.debug('parts {} {}'.format(parts, len(parts)))
                     if not (len(parts) == 3):
-                        logging.debug('not len == 3 ????')
+                        # logging.debug('not len == 3 ????')
                         continue
-                    logging.debug('getting the bytes...')
+                    # logging.debug('getting the bytes...')
                     the_bytes = [int(parts[0]), int(parts[1]), int(parts[2])]
-                    logging.debug('the bytes: {}'.format(the_bytes))
+                    # logging.debug('the bytes: {}'.format(the_bytes))
                     if not (the_bytes[0] & 176 == 176):
                         continue
                     channel = the_bytes[0] - 176
@@ -132,7 +132,7 @@ class jalv:
 
     
     def add_rack(self, rack_index):
-        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]], 'input_midi_connections': [[]]})
+        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]], 'input_midi_connections': []})
         self.rewire()
 
     def delete_rack(self, rack_index):
