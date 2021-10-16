@@ -46,6 +46,33 @@ const debounce = (fn, delay) => {
   }
 }
 
+function updateView(payload) {
+    console.log('updateView');
+    // console.log(payload);
+    for (var rack_index = 0; rack_index < payload['racks'].length; ++rack_index) {
+        for (var unit_index = 0; unit_index < payload['racks'][rack_index]['units'].length; ++unit_index) {
+            var unit = payload['racks'][rack_index]['units'][unit_index];
+            var unit_enabled_checkbox = document.getElementById('unit-enable-checkbox-' + rack_index + '-' + unit_index);
+            // console.log(unit_enabled_checkbox);
+            unit_enabled_checkbox.checked = unit['enabled'];
+        }
+    }
+};
+
+function viewUpdateRequestStateChanged() {
+    if (this.readyState == 4 && this.status == 200) {
+        var payload = JSON.parse(this.responseText);
+        updateView(payload);
+    }
+};
+
+function requestViewUpdate() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = viewUpdateRequestStateChanged;
+    xhr.open('GET', '/download', true);
+    xhr.send();
+};
+
 document.addEventListener("readystatechange", event => {
     console.log('readystatechange...');
     if (event.target.readyState === "complete") {
@@ -77,5 +104,9 @@ document.addEventListener("readystatechange", event => {
         }
 
         console.log("Done setting up listeners.");
+
+        console.log("Setting up updater...");
+        window.setInterval(requestViewUpdate, 1000);
+        console.log("Done setting up updater.");
     }
 });
