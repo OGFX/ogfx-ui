@@ -171,7 +171,7 @@ class jalv:
 
             if port['http://lv2plug.in/ns/lv2core#InputPort'] and port['http://lv2plug.in/ns/lv2core#ControlPort']:
                 logging.debug('input control port {} {}'.format(port['name'], port['symbol']))
-                control_port = { 'name': port['name'], 'symbol': port['symbol'], 'range': port['range'], 'value': port['range'][0], 'cc': { 'enabled': False, 'midi_channel': 0, 'midi_cc': 0, 'midi_cc_minimum': 0, 'midi_cc_maximum': 127, 'control_minimum': port['range'][1], 'control_maximum': port['range'][2]}}
+                control_port = { 'name': port['name'], 'symbol': port['symbol'], 'range': port['range'], 'value': port['range'][0], 'cc': { 'enabled': False, 'channel': 0, 'cc': 0, 'cc_minimum': 0, 'cc_maximum': 127, 'target_minimum': port['range'][1], 'target_maximum': port['range'][2], 'mode': 'linear'}}
                 input_control_ports.append(control_port)
 
         unit_uuid = str(uuid.uuid4())
