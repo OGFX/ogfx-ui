@@ -20,6 +20,16 @@
             </div>
         </div>
 
+        <div class="connections-info rounded-shadow-box">
+            <div>midi-input:</div>
+            % connection_index = 0
+            % for connection in setup['input_midi_connections']:
+                <div class="indent"><span>{{connection}}</span><a class="indent" href="disconnect/midi-input/{{connection_index}}">disconnect</a></div>
+                % connection_index = connection_index + 1
+            % end
+            <div><a class="indent" href="connect/midi-input">connect..</a></div>
+        </div>
+
         <div class="racks-navigation-list rounded-shadow-box">
             <span>racks:</span>
             <div class="operations indent">

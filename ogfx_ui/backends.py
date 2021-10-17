@@ -127,12 +127,12 @@ class jalv:
         
     def create_setup(self):
         logging.info("creating (empty default) setup...")
-        self.setup = {'racks': [], 'schema-version': 1 }
+        self.setup = {'racks': [], 'schema-version': 1, 'input_midi_connections': []}
         self.rewire()
 
     
     def add_rack(self, rack_index):
-        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]], 'input_midi_connections': []})
+        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]]})
         self.rewire()
 
     def delete_rack(self, rack_index):
@@ -369,6 +369,10 @@ class jalv:
         old_connections = self.connections
         self.connections = []
         self.lazy_connections = []
+
+        for connection in self.setup['input_midi_connections']:
+            self.lazy_connections.append(('ogfx_jack_midi_tool:in0', connection))
+
         for rack_index in range(0, len(self.setup['racks'])):
             rack = self.setup['racks'][rack_index]
             logging.debug('rewiring rack...')
@@ -444,9 +448,6 @@ class jalv:
                         for outp in outputs:
                             self.connections.append(('{}:out0{}'.format(switch_unit_jack_client_name(unit), (channel % len(unit['output_audio_ports']))), outp))
                             self.connections.append(('{}:{}'.format(unit_jack_client_name(unit), unit['output_audio_ports'][channel % len(unit['output_audio_ports'])]['symbol']), outp))
-
-            for connection in rack['input_midi_connections']:
-                self.lazy_connections.append(('ogfx_jack_midi_tool:in0', connection))
 
             logging.debug('linear connections...')
             for unit_index in range(1, len(units)):
