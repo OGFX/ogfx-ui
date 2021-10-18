@@ -78,18 +78,18 @@ def disconnect(rack_index, channel_index, direction, connection_index):
 
 # MIDI input connection for rack
 
-@bottle.route('/connect2/<rack_index:int>/midi-input/<port_name>')
-def connect2(rack_index, port_name):
-    og.setup['racks'][rack_index]['input_midi_connections'].append(port_name)
+@bottle.route('/connect2/midi-input/<port_name>')
+def connect2(port_name):
+    og.setup['input_midi_connections'].append(port_name)
     og.rewire()
-    bottle.redirect('/#rack-{}'.format(rack_index))
+    bottle.redirect('/')
 
-@bottle.route('/connect/<rack_index:int>/midi-input')
+@bottle.route('/connect/midi-input')
 @bottle.view('connect')
-def connect(rack_index):
+def connect():
     ports = og.find_jack_midi_ports('output')
     logging.debug('{}'.format(ports))
-    return dict({'ports': ports, 'remaining_path': '/{}/midi-input'.format(rack_index) })
+    return dict({'ports': ports, 'remaining_path': '/midi-input'})
 
 @bottle.route('/disconnect/<rack_index:int>/midi-input/<connection_index:int>')
 def disconnect(rack_index, connection_index):

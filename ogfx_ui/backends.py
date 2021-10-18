@@ -175,7 +175,7 @@ class jalv:
                 input_control_ports.append(control_port)
 
         unit_uuid = str(uuid.uuid4())
-        self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'input_connections': extra_input_connections, 'output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': { 'enabled': False, 'midi_channel': 0, 'midi_cc': 0}})
+        self.setup['racks'][rack_index]['units'].insert(unit_index, {'uri': uri, 'name': unit_name, 'input_control_ports': input_control_ports, 'input_audio_ports': input_audio_ports, 'output_audio_ports': output_audio_ports, 'input_connections': extra_input_connections, 'output_connections': extra_output_connections, 'uuid': unit_uuid, 'direction': direction, 'enabled': True, 'cc': { 'enabled': False, 'channel': 0, 'cc': 0}})
 
         self.rewire()
 

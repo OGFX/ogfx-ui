@@ -26,9 +26,9 @@ function unitMidiCCChanged(event) {
     var xhr = new XMLHttpRequest();
     var rack_index = this.parentNode.childNodes[1].dataset.rackIndex;
     var unit_index = this.parentNode.childNodes[1].dataset.unitIndex;
-    var enabled = document.getElementById('unit-midi-cc-enabled--' + rack_index + '-' + unit_index).checked ? 1 : 0;
-    var channel = document.getElementById('unit-midi-cc-channel--' + rack_index + '-' + unit_index).value;
-    var cc = document.getElementById('unit-midi-cc-cc--' + rack_index + '-' + unit_index).value;
+    var enabled = document.getElementById('unit-midi-cc-enabled-' + rack_index + '-' + unit_index).checked ? 1 : 0;
+    var channel = document.getElementById('unit-midi-cc-channel-' + rack_index + '-' + unit_index).value;
+    var cc = document.getElementById('unit-midi-cc-cc-' + rack_index + '-' + unit_index).value;
     xhr.open('GET', '/set_unit_midi_cc/' + rack_index + '/' + unit_index + '/' + enabled + '/' + channel + '/' + cc);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send();
