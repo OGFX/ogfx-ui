@@ -192,6 +192,36 @@ def download_rack(rack_index, unit_index):
 
 # UPLOADS
 
+@bottle.route('/upload2/<rack_index:int>/<unit_index:int>', method='POST')
+def upload_unit2(rack_index, unit_index):
+    upload = bottle.request.files.get('upload')
+    upload_contents = io.BytesIO()
+    upload.save(upload_contents)
+    logging.info(upload_contents.getvalue())
+    og.setup['racks'][rack_index]['units'][unit_index] = json.loads(upload_contents.getvalue())
+    og.rewire()
+    bottle.redirect('/')
+
+@bottle.route('/upload/<rack_index:int>/<unit_index:int>')
+@bottle.view('upload')
+def upload_unit(rack_index, unit_index):
+    return dict({'remaining_path': '/{}/{}'.format(rack_index, unit_index)})
+
+@bottle.route('/upload2/<rack_index:int>', method='POST')
+def upload_rack2(rack_index):
+    upload = bottle.request.files.get('upload')
+    upload_contents = io.BytesIO()
+    upload.save(upload_contents)
+    logging.info(upload_contents.getvalue())
+    og.setup['racks'][rack_index] = json.loads(upload_contents.getvalue())
+    og.rewire()
+    bottle.redirect('/')
+
+@bottle.route('/upload/<rack_index:int>')
+@bottle.view('upload')
+def upload_rack(rack_index):
+    return dict({'remaining_path': '/{}'.format(rack_index)})
+
 @bottle.route('/upload2', method='POST')
 def upload_setup2():
     upload = bottle.request.files.get('upload')
@@ -207,12 +237,14 @@ def upload_setup2():
 def upload_setup():
     return dict({'remaining_path': ''})
 
-
 def checkbox_to_bool(value):
     if value == 'on':
         return True
     else:
         return False
+
+
+# FORM SUBMISSION
 
 @bottle.route('/', method='POST')
 def index_post():
