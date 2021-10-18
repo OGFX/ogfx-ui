@@ -10,13 +10,11 @@
         <div class="rack">
             <span>Choose a file:</span>
             <table>
+                % import urllib
                 % index = 0
                 % for file in files:
                 <tr>
-                  <td><a href="/select_file2{{remaining_path}}/{{file['name']}}">{{file['name']}}</a></td>
-                  <td>[{{file['size']}}]</td>
-                  <td>[{{file['date']}}]</td>
-                  <td>[{{port['output']}}]</td>
+                  <td><a href="/load2{{remaining_path}}/{{urllib.parse.quote(file, safe='')}}">{{file}}</a></td>
                 </tr>
                 % index = index + 1
                 % end

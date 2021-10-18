@@ -17,21 +17,17 @@ logging.basicConfig(level=log_levels_map[arguments.log_level], format='ogfx: %(a
 
 import ogfx_ui
 
-logging.info((os.path.dirname(__file__)))
+logging.info('we are here: {}'.format((os.path.dirname(__file__))))
 
-setups_path = os.path.join(ogfx_ui.xdg.XDG_DATA_HOME, 'ogfx', 'setups')
-racks_path = os.path.join(ogfx_ui.xdg.XDG_DATA_HOME, 'ogfx', 'racks')
-units_path = os.path.join(ogfx_ui.xdg.XDG_DATA_HOME, 'ogfx', 'units')
-
-for path in [setups_path, racks_path, units_path]:
+for path in [ogfx_ui.setups_path, ogfx_ui.racks_path, ogfx_ui.units_path]:
     if not os.path.exists(path):
         logging.info('creating path {}'.format(path))
         os.makedirs(path)
 
-logging.info('using setups path {}'.format(setups_path))
-logging.info('using racks path {}'.format(racks_path))
-logging.info('using units path {}'.format(units_path))
-default_setup_file_path = os.path.join(setups_path, 'default.ogfx-setup')
+logging.info('using setups path {}'.format(ogfx_ui.setups_path))
+logging.info('using racks path {}'.format(ogfx_ui.racks_path))
+logging.info('using units path {}'.format(ogfx_ui.units_path))
+default_setup_file_path = os.path.join(ogfx_ui.setups_path, 'default.ogfx-setup')
 
 logging.info('scanning for lv2 plugins...')
 lv2_world_json_string = subprocess.check_output(['ogfx_lv2ls'])

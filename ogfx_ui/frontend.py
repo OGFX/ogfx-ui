@@ -9,14 +9,20 @@ import bottle
 # python3 imports
 import json
 import os
+import pathlib
 import copy
 import io
 import logging
+import urllib
 
 import time
 import subprocess
 import sys
 import traceback
+
+setups_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'setups')
+racks_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'racks')
+units_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'units')
 
 og = None
 
@@ -243,6 +249,24 @@ def checkbox_to_bool(value):
     else:
         return False
 
+
+# SAVING FILES
+
+# LOADING FILES
+
+@bottle.route('/load2/<path:path>')
+def load2(path):
+    logging.debug('load2: path: {}'.format(path))
+    with open(path, 'r') as file:
+        data = json.loads(file.read())
+        og.setup = data
+
+    bottle.redirect('/')
+
+@bottle.route('/load')
+@bottle.view('file_chooser')
+def load_setup():
+    return {'files': list(map(str, pathlib.Path(setups_path).iterdir())), 'remaining_path': ''}
 
 # FORM SUBMISSION
 
