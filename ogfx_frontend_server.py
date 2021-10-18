@@ -27,7 +27,6 @@ for path in [ogfx_ui.setups_path, ogfx_ui.racks_path, ogfx_ui.units_path]:
 logging.info('using setups path {}'.format(ogfx_ui.setups_path))
 logging.info('using racks path {}'.format(ogfx_ui.racks_path))
 logging.info('using units path {}'.format(ogfx_ui.units_path))
-default_setup_file_path = os.path.join(ogfx_ui.setups_path, 'default.ogfx-setup')
 
 logging.info('scanning for lv2 plugins...')
 lv2_world_json_string = subprocess.check_output(['ogfx_lv2ls'])
@@ -47,12 +46,12 @@ try:
             og.setup_filename = arguments.setup
             og.rewire()
     else:
-        if os.path.exists(default_setup_file_path):
-            with open(default_setup_file_path) as f:
+        if os.path.exists(ogfx_ui.default_setup_file_path):
+            with open(ogfx_ui.default_setup_file_path) as f:
                 setup_json_string = f.read()
                 setup = json.loads(setup_json_string)
                 og.setup = setup
-                og.setup_filename = default_setup_file_path
+                og.setup_filename = ogfx_ui.default_setup_file_path
                 og.rewire()
                 
 except KeyError as e:
@@ -63,9 +62,8 @@ except:
 
 ogfx_ui.run(og)
 
-logging.info('writing default setup...')
-with open(default_setup_file_path, 'w') as f:
-    f.write(json.dumps(og.setup, indent=4))
+ogfx_ui.save_default_setup()
+
 
 logging.info('stopping threads...')
 og.stop_threads()

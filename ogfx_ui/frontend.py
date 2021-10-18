@@ -23,6 +23,7 @@ import traceback
 setups_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'setups')
 racks_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'racks')
 units_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'units')
+default_setup_file_path = os.path.join(setups_path, 'default.ogfx-setup')
 
 og = None
 
@@ -251,6 +252,12 @@ def checkbox_to_bool(value):
 
 
 # SAVING FILES
+
+def save_default_setup():
+    logging.info('writing default setup...')
+    with open(default_setup_file_path, 'w') as f:
+        f.write(json.dumps(og.setup, indent=4))
+
 
 # LOADING FILES
 
