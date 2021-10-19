@@ -16,11 +16,11 @@
             <a href="upload/{{rack_index}}/{{unit_index}}">ul..</a>
             <a href="download/{{rack_index}}/{{unit_index}}" download="ogfx-unit.json">dl..</a>
         </div>
-        <span>
+        <span class="indent">
             MIDI CC:
             <input id="unit-midi-cc-enabled-{{rack_index}}-{{unit_index}}" class="unit-midi-cc-enabled" name="unit_midi_cc_enabled_{{rack_index}}_{{unit_index}}" title="Midi CC enabled" type="checkbox" {{'checked' if unit['cc']['enabled'] else ''}} data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}">
-            <input id="unit-midi-cc-channel-{{rack_index}}-{{unit_index}}" class="unit-midi-cc-channel" name="unit_midi_cc_channel_{{rack_index}}_{{unit_index}}" title="Midi channel (0..15)" type="number" min="0" max="15" value="{{unit['cc']['channel']}}">
-            <input id="unit-midi-cc-cc-{{rack_index}}-{{unit_index}}" class="unit-midi-cc-cc" name="unit_midi_cc_cc_{{rack_index}}_{{unit_index}}" title="Midi CC (0..127)" type="number" min="0" max="127" value="{{unit['cc']['cc']}}">
+            <input id="unit-midi-cc-channel-{{rack_index}}-{{unit_index}}" class="unit-midi-cc-channel midi-cc-channel" name="unit_midi_cc_channel_{{rack_index}}_{{unit_index}}" title="Midi channel (0..15)" type="number" min="0" max="15" value="{{unit['cc']['channel']}}">
+            <input id="unit-midi-cc-cc-{{rack_index}}-{{unit_index}}" class="unit-midi-cc-cc midi-cc-cc" name="unit_midi_cc_cc_{{rack_index}}_{{unit_index}}" title="Midi CC (0..127)" type="number" min="0" max="127" value="{{unit['cc']['cc']}}">
         </span>
         <div class="connections-info">
             <details>
