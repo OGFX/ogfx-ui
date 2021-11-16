@@ -98,11 +98,11 @@ def connect():
     logging.debug('{}'.format(ports))
     return dict({'ports': ports, 'remaining_path': '/midi-input'})
 
-@bottle.route('/disconnect/<rack_index:int>/midi-input/<connection_index:int>')
-def disconnect(rack_index, connection_index):
-    del og.setup['racks'][rack_index]['input_midi_connections'][connection_index]
+@bottle.route('/disconnect/midi-input/<connection_index:int>')
+def disconnect(connection_index):
+    del og.setup['input_midi_connections'][connection_index]
     og.rewire()
-    bottle.redirect('/#rack-{}'.format(rack_index))
+    bottle.redirect('/')
 
 # UNITS
 
