@@ -83,7 +83,7 @@ def disconnect(rack_index, channel_index, direction, connection_index):
     og.rewire()
     bottle.redirect('/#rack-{}'.format(rack_index))
 
-# MIDI input connection for rack
+# MIDI input connections
 
 @bottle.route('/connect2/midi-input/<port_name>')
 def connect2(port_name):
