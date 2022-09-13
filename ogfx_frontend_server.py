@@ -33,7 +33,8 @@ lv2_world_json_string = subprocess.check_output(['ogfx_lv2ls'])
 lv2_world = json.loads(lv2_world_json_string)
 logging.info('number of plugins: {}'.format(len(lv2_world)))
 
-og = ogfx_ui.backends.jalv(lv2_world)
+# og = ogfx_ui.backends.jalv(lv2_world)
+og = ogfx_ui.backends.mod_host(lv2_world)
 og.start_threads()
 
 try:
