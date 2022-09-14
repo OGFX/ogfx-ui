@@ -258,7 +258,7 @@ class backend:
                 for port in unit['input_connections']:
                     # logging.debug(port)
                     for connection in port:
-                        c = [connection, '{}:{}'.format(self.switch_unit_jack_client_name(unit), 'in{}'.format(port_index))]
+                        c = [connection, '{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_input_ports[port_index])]
                         logging.debug(c)
                         self.connections.append(c)
                     port_index += 1
@@ -273,9 +273,9 @@ class backend:
                     
                 # Internal connections:
                 if len(unit['input_audio_ports']) >= 1:
-                    self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), 'out10'), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
+                    self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[0]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
                 if len(unit['input_audio_ports']) >= 2:
-                    self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), 'out11'), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
+                    self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[1]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
 
             logging.debug('rack connections...')
             input_is_mono = (not not rack['input_connections'][0]) != (not not rack['input_connections'][1])
@@ -312,7 +312,7 @@ class backend:
                     for channel in range(0,2):
                         outputs = output_connections[channel % len(output_connections)]
                         for outp in outputs:
-                            self.connections.append(('{}:out0{}'.format(self.switch_unit_jack_client_name(unit), (channel % len(unit['output_audio_ports']))), outp))
+                            self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output1_ports[channel % len(unit['output_audio_ports'])]), outp))
                             self.connections.append(('{}:{}'.format(self.unit_jack_client_name(unit), unit['output_audio_ports'][channel % len(unit['output_audio_ports'])]['symbol']), outp))
 
             logging.debug('linear connections...')
@@ -332,11 +332,11 @@ class backend:
                     current_port = port_index % current_ports
                     previous_port = port_index % previous_ports
                     self.connections.append((
-                        '{}:{}'.format(self.switch_unit_jack_client_name(prev_unit), 'out0{}'.format(previous_port)),
-                        '{}:{}'.format(self.switch_unit_jack_client_name(unit), 'in{}'.format(current_port)))) 
+                        '{}:{}'.format(self.switch_unit_jack_client_name(prev_unit), self.switch_output1_ports[previous_port]),
+                        '{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_input_ports[current_port]))) 
                     self.connections.append((
                         '{}:{}'.format(self.unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][previous_port]['symbol']),
-                        '{}:{}'.format(self.switch_unit_jack_client_name(unit), 'in{}'.format(current_port)))) 
+                        '{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_input_ports[current_port]))) 
                        
         self.rewire_update_connections(old_connections, self.connections)
         self.setup_midi_maps()
@@ -349,6 +349,9 @@ class mod_host(backend):
         self.mod_units = []
         self.mod_start_index = 8000
         self.mod_process = subprocess.Popen(["mod-host", "-i"], stdin=subprocess.PIPE)
+        self.switch_input_ports = [ "InL", "InR" ]
+        self.switch_output1_ports = [ "OUT1L", "OUT1R" ]
+        self.switch_output2_ports = [ "Out2L", "Out2R" ]
         backend.__init__(self, lv2_world)
 
     def __del__(self):
@@ -384,14 +387,16 @@ class mod_host(backend):
                     self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {}\n".format(2*len(self.mod_units)+1).encode('utf-8')) 
                     self.mod_process.stdin.flush()
                     self.mod_units.append(unit['uuid'])
+                    time.sleep(0.05)
         self.rewire_remove_leftover_units()
 
     def unit_jack_client_name(self, unit):
-        return '{}-{}'.format(unit['uuid'][0:8], unit['name'])
+        index = self.mod_units.index(unit['uuid'])     
+        return 'effect_{}'.format(2*index)
 
     def switch_unit_jack_client_name(self, unit):
-        return '{}-{}-{}'.format(unit['uuid'][0:8], 'switch', unit['name'])
-
+        index = self.mod_units.index(unit['uuid'])    
+        return 'effect_{}'.format(2*index+1)
        
 
 class jalv(backend):
