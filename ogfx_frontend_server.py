@@ -30,12 +30,15 @@ logging.info('using units path {}'.format(ogfx_ui.units_path))
 
 logging.info('scanning for lv2 plugins...')
 lv2_world_json_string = subprocess.check_output(['ogfx_lv2ls'])
+logging.debug('parsing json')
 lv2_world = json.loads(lv2_world_json_string)
 logging.info('number of plugins: {}'.format(len(lv2_world)))
 
 # og = ogfx_ui.backends.jalv(lv2_world)
+logging.info('starting backend...')
 og = ogfx_ui.backends.mod_host(lv2_world)
 og.start_threads()
+logging.info('done.')
 
 try:
     if arguments.setup:

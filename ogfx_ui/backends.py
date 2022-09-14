@@ -305,7 +305,7 @@ class backend:
                     for channel in range(0,2):
                         inputs = input_connections[channel % len(input_connections)]
                         for inp in inputs:
-                            self.connections.append((inp, '{}:in{}'.format(self.switch_unit_jack_client_name(unit), (channel % len(unit['input_audio_ports'])))))
+                            self.connections.append((inp, '{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_input_ports[channel % len(unit['input_audio_ports'])])))
                     
                     logging.debug('output')
                     unit = units[-1]
@@ -362,10 +362,15 @@ class mod_host(backend):
         pass
 
     def set_port_value(self, rack_index, unit_index, port_index, value):
-        pass
+        logging.debug("set port value {} {} {} {}".format(rack_index, unit_index, port_index, value))
+        index = self.mod_units.index(self.setup['racks'][rack_index]['units'][unit_index]['uuid']) * 2
+        self.mod_process.stdin.write('param_set {} {} {}\n'.format(index, self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['symbol'], value).encode('utf-8'))
+        self.mod_process.stdin.flush()
 
     def toggle_unit_active(self, rack_index, unit_index, active):
-        pass
+        logging.debug("toggle unit active {} {} {}".format(rack_index, unit_index, active))
+        index = self.mod_units.index(self.setup['racks'][rack_index]['units'][unit_index]['uuid']) * 2 + 1
+        self.mod_process.stdin.write('param_set {} Switch {}\n'.format(index, (1 if active else 0)).encode('utf-8'))
         
     def rewire_port_with_prefix_exists(self, s):
         ports_json_string = subprocess.check_output(['ogfx_jack_list_ports'])
