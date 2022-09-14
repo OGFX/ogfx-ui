@@ -371,6 +371,8 @@ class mod_host(backend):
         logging.debug("toggle unit active {} {} {}".format(rack_index, unit_index, active))
         index = self.mod_units.index(self.setup['racks'][rack_index]['units'][unit_index]['uuid']) * 2 + 1
         self.mod_process.stdin.write('param_set {} Switch {}\n'.format(index, (1 if active else 0)).encode('utf-8'))
+        self.mod_process.stdin.flush()
+        self.setup['racks'][rack_index]['units'][unit_index]['enabled'] = bool(active)	
         
     def rewire_port_with_prefix_exists(self, s):
         ports_json_string = subprocess.check_output(['ogfx_jack_list_ports'])
@@ -392,7 +394,7 @@ class mod_host(backend):
                     self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {}\n".format(2*len(self.mod_units)+1).encode('utf-8')) 
                     self.mod_process.stdin.flush()
                     self.mod_units.append(unit['uuid'])
-                    time.sleep(0.05)
+                    time.sleep(0.5)
         self.rewire_remove_leftover_units()
 
     def unit_jack_client_name(self, unit):
