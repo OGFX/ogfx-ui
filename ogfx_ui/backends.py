@@ -121,6 +121,7 @@ class backend:
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['enabled'] = enabled
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['channel'] = channel
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['cc'] = cc
+
         self.setup_midi_maps()
 
     def move_rack_down(self, rack_index):
@@ -364,10 +365,18 @@ class mod_host(backend):
     def __del__(self):
         self.mod_process.stdin.close()
         self.mod_process.wait()
-        
-    def rewire_manage_units(self):
-        pass
-
+    
+    def setup_midi_maps(self):
+        for rack in self.setup['racks']:
+            for unit in rack['units']:
+                index = 2 * self.mod_units.index(unit['uuid']) + 1
+                if unit['cc']['enabled']:
+                    self.mod_process.stdin.write('midi_map {} Switch {} {} 0 1\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
+                    self.mod_process.stdin.flush()
+                else:
+                    self.mod_process.stdin.write('midi_unmap {} Switch\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
+                    self.mod_process.stdin.flush()
+            
     def set_port_value(self, rack_index, unit_index, port_index, value):
         logging.debug("set port value {} {} {} {}".format(rack_index, unit_index, port_index, value))
         self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['value'] = value
