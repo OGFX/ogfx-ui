@@ -370,6 +370,7 @@ class mod_host(backend):
 
     def set_port_value(self, rack_index, unit_index, port_index, value):
         logging.debug("set port value {} {} {} {}".format(rack_index, unit_index, port_index, value))
+        self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['value'] = value
         index = self.mod_units.index(self.setup['racks'][rack_index]['units'][unit_index]['uuid']) * 2
         self.mod_process.stdin.write('param_set {} {} {}\n'.format(index, self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['symbol'], value).encode('utf-8'))
         self.mod_process.stdin.flush()

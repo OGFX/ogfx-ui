@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from .backends import jalv
 from .xdg import *
 
 # External dependencies imports
