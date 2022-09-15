@@ -228,6 +228,13 @@ class backend:
                 except:
                     pass        
 
+    def rewire_port_with_prefix_exists(self, s):
+        ports_json_string = subprocess.check_output(['ogfx_jack_list_ports'])
+        ports = json.loads(ports_json_string)
+        for port in ports:
+            if port['name'].find(s) == 0:
+                return True
+
     def rewire(self):
         logging.info('rewire...')
         self.rewire_manage_units()
@@ -374,15 +381,15 @@ class mod_host(backend):
         self.mod_process.stdin.flush()
         self.setup['racks'][rack_index]['units'][unit_index]['enabled'] = bool(active)	
         
-    def rewire_port_with_prefix_exists(self, s):
-        ports_json_string = subprocess.check_output(['ogfx_jack_list_ports'])
-        ports = json.loads(ports_json_string)
-        for port in ports:
-            if port['name'].find(s) == 0:
-                return True
-        
+       
     def rewire_remove_leftover_units(self):
-        pass
+        for unit_uuid in self.mod_units:
+            if not self.unit_in_setup(unit_uuid):
+                index = self.mod_units.index(unit_uuid)
+                self.mod_process.stdin.write('remove {}\n'.format(2*index).encode('utf-8'))
+                self.mod_process.stdin.write('remove {}\n'.format(2*index+1).encode('utf-8'))
+                self.mod_process.stdin.flush()
+                self.mod_units[index] = ''
 
     def rewire_manage_units(self):
         logging.debug('managing subprocesses...')
@@ -394,7 +401,18 @@ class mod_host(backend):
                     self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {}\n".format(2*len(self.mod_units)+1).encode('utf-8')) 
                     self.mod_process.stdin.flush()
                     self.mod_units.append(unit['uuid'])
-                    time.sleep(0.5)
+                    delta_t = 0.01
+                    t = 0
+                    while (not self.rewire_port_with_prefix_exists(self.switch_unit_jack_client_name(unit))) and delta_t < 1:
+                        time.sleep(delta_t)
+                        t = t + delta_t
+                        
+                    logging.debug('switch ports appeared...')
+                    t = 0
+                    while (not self.rewire_port_with_prefix_exists(self.unit_jack_client_name(unit))) and delta_t < 1:
+                        time.sleep(delta_t)
+                        t = t + delta_t
+                    logging.debug('unit ports appeared...') 
         self.rewire_remove_leftover_units()
 
     def unit_jack_client_name(self, unit):
