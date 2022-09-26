@@ -416,13 +416,13 @@ class mod_host(backend):
             # First let's do the process management
             for unit in rack['units']:
                 if not unit['uuid'] in self.mod_units:
-                    self.mod_process.stdin.write("add {} {}\n".format(unit['uri'], 2*len(self.mod_units)).encode('utf-8')) 
-                    self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {}\n".format(2*len(self.mod_units)+1).encode('utf-8')) 
+                    self.mod_process.stdin.write("add {} {} {}\n".format(unit['uri'], 2*len(self.mod_units), self.unit_jack_client_name(unit)).encode('utf-8')) 
+                    self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {} {}\n".format(2*len(self.mod_units)+1, self.switch_unit_jack_client_name(unit)).encode('utf-8')) 
                     self.mod_process.stdin.flush()
                     self.mod_units.append(unit['uuid'])
 
         if len(self.setup['racks']) and len(self.setup['racks'][0]['units']):
-            delta_t = 0.01
+            delta_t = 0.1
             t = 0
             while (not self.rewire_port_with_prefix_exists(self.switch_unit_jack_client_name(self.setup['racks'][0]['units'][-1]))) and delta_t < 1:
                 time.sleep(delta_t)
@@ -432,12 +432,25 @@ class mod_host(backend):
         self.rewire_remove_leftover_units()
 
     def unit_jack_client_name(self, unit):
-        index = self.mod_units.index(unit['uuid'])     
-        return 'effect_{}'.format(2*index)
+        return '{}-{}'.format(unit['uuid'][0:8], unit['uri'][-54:])
 
     def switch_unit_jack_client_name(self, unit):
-        index = self.mod_units.index(unit['uuid'])    
-        return 'effect_{}'.format(2*index+1)
-       
+        return '{}-{}-{}'.format(unit['uuid'][0:8], 'switch', unit['uri'][-47:])
+
+    # def unit_jack_client_name(self, unit):
+    #     return '{}-{}'.format(unit['uuid'][0:8], unit['uri'])
+
+    # def switch_unit_jack_client_name(self, unit):
+    #     return '{}-{}-{}'.format(unit['uuid'][0:8], 'switch', unit['uri'])
+
+
+    # def unit_jack_client_name(self, unit):
+    #     index = self.mod_units.index(unit['uuid'])     
+    #     return 'effect_{}'.format(2*index)
+
+    # def switch_unit_jack_client_name(self, unit):
+    #     index = self.mod_units.index(unit['uuid'])    
+    #     return 'effect_{}'.format(2*index+1)
+    #    
 
 
