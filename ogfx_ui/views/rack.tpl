@@ -1,7 +1,6 @@
 <div id="rack-{{rack_index}}" class="rounded-shadow-box rack">
     <details open>
         <summary>
-            {{rack_index}}._._:
             <input type="checkbox" {{'checked' if rack['enabled'] else ''}} name="rack-enabled-{{rack_index}}" title="Rack enable">
             <span>rack-{{rack_index}}</span>
         </summary>

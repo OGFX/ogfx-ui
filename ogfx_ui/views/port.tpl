@@ -1,12 +1,11 @@
 <div class="port-info">
     % port_index = 0
     % for port in unit['input_control_ports']:
-        <div class="port-summary-wrap port rounded-shadow-box">
+        <div class="port-summary-wrap port">
             <div class="port-summary">
                 <div class="port-summary-first-line">
                     <div>
-                    <span>{{rack_index}}.{{unit_index}}.{{port_index}}:</span>
-                    <span>{{port['name']}} [{{port['range'][1]}} {{port['range'][0]}} {{port['range'][2]}}]</span>
+                    <span>{{port['name']}}</span>
                     </div>
                 </div>
                 <div class="control-input-container">

@@ -1,7 +1,7 @@
 input[type=range] {
-  height: 37px;
+  height: 22px;
   -webkit-appearance: none;
-  margin: 10px 0;
+  margin: 0 0;
   width: 100%;
 }
 input[type=range]:focus {

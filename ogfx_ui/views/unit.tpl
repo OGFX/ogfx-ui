@@ -1,7 +1,6 @@
 <div class="unit rounded-shadow-box" id="unit-{{rack_index}}-{{unit_index}}">
     <details>
         <summary class="unit-info">
-            <span>{{rack_index}}.{{unit_index}}._:</span>
             <input id="unit-enable-checkbox-{{rack_index}}-{{unit_index}}" class="unit-enable-checkbox" title="Unit enabled" type="checkbox" {{'checked' if unit['enabled'] else ''}} name="unit_enabled_{{rack_index}}_{{unit_index}}" data-rack-index="{{rack_index}}" data-unit-index="{{unit_index}}">
             <span>{{len(unit['input_audio_ports'])}}:{{len(unit['output_audio_ports'])}}</span>
             <span>{{unit['name']}}</span>

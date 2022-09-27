@@ -1,7 +1,7 @@
 
 body {
     background-color: #7697a0;
-    padding: 0.0em;
+    padding: 0.3em;
     margin: 0.0em;
     font-size: 1.0em;
     font-family: monospace;
@@ -23,8 +23,8 @@ span {
     border-style: solid;
     border-color: #000000;
     border-width: 0.1em;
-    margin: 0.6em;
-    padding: 0.3em 0.6em 0.3em 0.6em;
+    margin: 0 0 0.3em 0;
+    padding: 0 0.3em 0.3em 0.3em;
 }
 
 #top-menu {
@@ -67,13 +67,18 @@ span {
 
 .port-summary-wrap {
     display: inline-block;
-    width: calc(100% - 2em);
+    width: 100%;
 }
 
 .port-summary-first-line {
     display: flex;
+    position: absolute;
     flex-direction: row;
     justify-content: space-between;
+    margin-top: 3px;
+    margin-left: 3px;
+    user-select: none;
+    pointer-events: none;
 }
 
 .port {
@@ -128,6 +133,7 @@ span {
     border-radius: 0.0em;
     border-color: #000000;
     border-width: 1px;
+    height: 18px;
 }
 
 .midi-cc-channel {
