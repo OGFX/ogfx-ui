@@ -365,13 +365,14 @@ class mod_host(backend):
         self.midi_input_port = 'mod-host:midi_in'
         self.mod_units = []
         self.mod_start_index = 8000
-        self.mod_process = subprocess.Popen(["mod-host", "-i"], stdin=subprocess.PIPE)
+        self.mod_process = subprocess.Popen(["mod-host", "-i"], stdin=subprocess.PIPE, preexec_fn=ignore_sigint)
         self.switch_input_ports = [ "InL", "InR" ]
         self.switch_output1_ports = [ "OUT1L", "OUT1R" ]
         self.switch_output2_ports = [ "Out2L", "Out2R" ]
         backend.__init__(self, lv2_world)
 
     def __del__(self):
+        logging.debug('destructor...')
         self.mod_process.stdin.close()
         self.mod_process.wait()
     

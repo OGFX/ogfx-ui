@@ -100,7 +100,7 @@ span {
     /* color: #ffffff;*/
 }
 
-.control-input-container > input[type="number"] {
+.control-input-container > input[type="text"] {
     /* width: 100%;*/
     flex-grow: 1;
     margin: 0.0em;
@@ -125,7 +125,7 @@ span {
 
 .float {
     width: 6em;
-    border-radius: 0.4em;
+    border-radius: 0.0em;
     border-color: #000000;
     border-width: 1px;
 }
