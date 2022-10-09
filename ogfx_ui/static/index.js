@@ -1,5 +1,5 @@
 function sliderChanged(el) {
-    console.log('sliderChanged');
+    // console.log('sliderChanged');
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "/set_port_value/" + this.dataset.rackIndex + "/" + this.dataset.unitIndex + "/" + this.dataset.portIndex + "/" + this.value, true);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -9,8 +9,8 @@ function sliderChanged(el) {
 };
 
 function unitEnableChanged(event) {
-    console.log('unitEnableChanged');
-    console.log(event.target.checked);
+    // console.log('unitEnableChanged');
+    // console.log(event.target.checked);
     var xhr = new XMLHttpRequest();
     var enabled = 0;
     if (event.target.checked) { 
@@ -81,6 +81,39 @@ document.addEventListener("readystatechange", event => {
         for (var index = 0; index < sliders.length; ++index) {
             sliders[index].style.display="block";
             sliders[index].oninput = sliderChanged;
+
+            let range = sliders[index];
+            range.onmousedown = function(e) {
+                console.log(index);
+                range.setPointerCapture(e.pointerId);
+                range.mouseDownEvent = e;
+                range.mouseDownValue = parseFloat(range.value);
+                return false;
+            }
+
+            range.onmouseup = function(e) {
+                range.releasePointerCapture(e.pointerId);
+                range.mouseDownEvent = null;
+                return false;
+            }
+
+            range.onmousemove = function(e) {
+                var threshold = 1/5;
+                var factor = 1/10;
+
+                if (range.mouseDownEvent) {
+                    var diff = (e.clientX - range.mouseDownEvent.clientX) / range.clientWidth;
+                    if (Math.abs(diff) < threshold) {
+                        diff = factor * diff;
+                    } else {
+                        diff = diff - Math.sign(diff) * (threshold - factor * threshold);
+                    }
+
+                    range.value = "" + (range.mouseDownValue + (parseFloat(range.max) - parseFloat(range.min)) * diff);
+                    sliderChanged.call(range);
+                }
+                return false;
+            }
         }
 
         var unit_checkboxes = document.getElementsByClassName("unit-enable-checkbox");

@@ -275,7 +275,7 @@ class backend:
                 for port in unit['input_connections']:
                     # logging.debug(port)
                     for connection in port:
-                        c = [connection, '{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_input_ports[port_index])]
+                        c = [connection, '{}:{}'.format(self.unit_jack_client_name(unit), port['symbol'])]
                         logging.debug(c)
                         self.connections.append(c)
                     port_index += 1
@@ -289,10 +289,10 @@ class backend:
                     port_index += 1
                     
                 # Internal connections:
-                if len(unit['input_audio_ports']) >= 1:
-                    self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[0]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
-                if len(unit['input_audio_ports']) >= 2:
-                    self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[1]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
+                # if len(unit['input_audio_ports']) >= 1:
+                #     self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[0]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
+                # if len(unit['input_audio_ports']) >= 2:
+                #     self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[1]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
 
             logging.debug('rack connections...')
             input_is_mono = (not not rack['input_connections'][0]) != (not not rack['input_connections'][1])
@@ -322,7 +322,7 @@ class backend:
                     for channel in range(0,2):
                         inputs = input_connections[channel % len(input_connections)]
                         for inp in inputs:
-                            self.connections.append((inp, '{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_input_ports[channel % len(unit['input_audio_ports'])])))
+                            self.connections.append((inp, '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][channel % len(unit['input_audio_ports'])]['symbol'])))
                     
                     logging.debug('output')
                     unit = units[-1]
@@ -349,11 +349,8 @@ class backend:
                     current_port = port_index % current_ports
                     previous_port = port_index % previous_ports
                     self.connections.append((
-                        '{}:{}'.format(self.switch_unit_jack_client_name(prev_unit), self.switch_output1_ports[previous_port]),
-                        '{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_input_ports[current_port]))) 
-                    self.connections.append((
                         '{}:{}'.format(self.unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][previous_port]['symbol']),
-                        '{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_input_ports[current_port]))) 
+                        '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][current_port]['symbol']))) 
                        
         self.rewire_update_connections(old_connections, self.connections)
         self.setup_midi_maps()
@@ -380,12 +377,12 @@ class mod_host(backend):
         for rack in self.setup['racks']:
             for unit in rack['units']:
                 index = 2 * self.mod_units.index(unit['uuid']) + 1
-                if unit['cc']['enabled']:
-                    self.mod_process.stdin.write('midi_map {} Switch {} {} 0 1\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
-                    self.mod_process.stdin.flush()
-                else:
-                    self.mod_process.stdin.write('midi_unmap {} Switch\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
-                    self.mod_process.stdin.flush()
+                # if unit['cc']['enabled']:
+                    # self.mod_process.stdin.write('midi_map {} Switch {} {} 0 1\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
+                    # self.mod_process.stdin.flush()
+                # else:
+                    # self.mod_process.stdin.write('midi_unmap {} Switch\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
+                    # self.mod_process.stdin.flush()
             
     def set_port_value(self, rack_index, unit_index, port_index, value):
         logging.debug("set port value {} {} {} {}".format(rack_index, unit_index, port_index, value))
@@ -397,12 +394,14 @@ class mod_host(backend):
     def toggle_unit_active(self, rack_index, unit_index, active):
         logging.debug("toggle unit active {} {} {}".format(rack_index, unit_index, active))
         index = self.mod_units.index(self.setup['racks'][rack_index]['units'][unit_index]['uuid']) * 2 + 1
-        self.mod_process.stdin.write('param_set {} Switch {}\n'.format(index, (1 if active else 0)).encode('utf-8'))
+        self.mod_process.stdin.write('bypass {} {}\n'.format(index, (0 if active else 1)).encode('utf-8'))
+        # self.mod_process.stdin.write('param_set {} Switch {}\n'.format(index, (1 if active else 0)).encode('utf-8'))
         self.mod_process.stdin.flush()
         self.setup['racks'][rack_index]['units'][unit_index]['enabled'] = bool(active)	
         
        
     def rewire_remove_leftover_units(self):
+        logging.debug("removing leftover units...")
         for unit_uuid in self.mod_units:
             if not self.unit_in_setup(unit_uuid):
                 index = self.mod_units.index(unit_uuid)
@@ -418,14 +417,14 @@ class mod_host(backend):
             for unit in rack['units']:
                 if not unit['uuid'] in self.mod_units:
                     self.mod_process.stdin.write("add {} {} {}\n".format(unit['uri'], 2*len(self.mod_units), self.unit_jack_client_name(unit)).encode('utf-8')) 
-                    self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {} {}\n".format(2*len(self.mod_units)+1, self.switch_unit_jack_client_name(unit)).encode('utf-8')) 
+                    # self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {} {}\n".format(2*len(self.mod_units)+1, self.switch_unit_jack_client_name(unit)).encode('utf-8')) 
                     self.mod_process.stdin.flush()
                     self.mod_units.append(unit['uuid'])
 
         if len(self.setup['racks']) and len(self.setup['racks'][0]['units']):
             delta_t = 0.1
             t = 0
-            while (not self.rewire_port_with_prefix_exists(self.switch_unit_jack_client_name(self.setup['racks'][0]['units'][-1]))) and delta_t < 1:
+            while (not self.rewire_port_with_prefix_exists(self.unit_jack_client_name(self.setup['racks'][0]['units'][-2]))) and delta_t < 1:
                 time.sleep(delta_t)
                 t = t + delta_t
                 
