@@ -376,13 +376,13 @@ class mod_host(backend):
     def setup_midi_maps(self):
         for rack in self.setup['racks']:
             for unit in rack['units']:
-                index = 2 * self.mod_units.index(unit['uuid']) + 1
-                # if unit['cc']['enabled']:
-                    # self.mod_process.stdin.write('midi_map {} Switch {} {} 0 1\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
-                    # self.mod_process.stdin.flush()
-                # else:
-                    # self.mod_process.stdin.write('midi_unmap {} Switch\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
-                    # self.mod_process.stdin.flush()
+                index = 2 * self.mod_units.index(unit['uuid'])
+                if unit['cc']['enabled']:
+                    self.mod_process.stdin.write('midi_map {} :bypass {} {} 0 1\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
+                    self.mod_process.stdin.flush()
+                else:
+                    self.mod_process.stdin.write('midi_unmap {} :bypass\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
+                    self.mod_process.stdin.flush()
             
     def set_port_value(self, rack_index, unit_index, port_index, value):
         logging.debug("set port value {} {} {} {}".format(rack_index, unit_index, port_index, value))
@@ -393,7 +393,7 @@ class mod_host(backend):
 
     def toggle_unit_active(self, rack_index, unit_index, active):
         logging.debug("toggle unit active {} {} {}".format(rack_index, unit_index, active))
-        index = self.mod_units.index(self.setup['racks'][rack_index]['units'][unit_index]['uuid']) * 2 + 1
+        index = self.mod_units.index(self.setup['racks'][rack_index]['units'][unit_index]['uuid']) * 2
         self.mod_process.stdin.write('bypass {} {}\n'.format(index, (0 if active else 1)).encode('utf-8'))
         # self.mod_process.stdin.write('param_set {} Switch {}\n'.format(index, (1 if active else 0)).encode('utf-8'))
         self.mod_process.stdin.flush()
@@ -416,6 +416,7 @@ class mod_host(backend):
             # First let's do the process management
             for unit in rack['units']:
                 if not unit['uuid'] in self.mod_units:
+                    logging.debug("adding plugin: {}".format(unit['uri']))
                     self.mod_process.stdin.write("add {} {} {}\n".format(unit['uri'], 2*len(self.mod_units), self.unit_jack_client_name(unit)).encode('utf-8')) 
                     # self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {} {}\n".format(2*len(self.mod_units)+1, self.switch_unit_jack_client_name(unit)).encode('utf-8')) 
                     self.mod_process.stdin.flush()
