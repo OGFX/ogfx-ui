@@ -85,6 +85,10 @@ span {
     background-color: #f0f0f0;
 }
 
+.port-cc-mapping {
+    /* display: none; */
+}
+
 .unit-info {
 }
 

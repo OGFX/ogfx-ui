@@ -322,6 +322,8 @@ def index_post():
                 param_name = 'input_control_port_value_text_{}_{}_{}'.format(rack_index, unit_index, port_index)
                 logging.debug('port value for: {} {} {} - {}'.format(rack_index, unit_index, port_index, param_name ))
                 og.set_port_value(rack_index, unit_index, port_index, float(bottle.request.forms.get(param_name)))
+                param_name = 'input_control_port_cc_enabled_checkbox_{}_{}_{}'.format(rack_index, unit_index, port_index)
+                og.set_port_midi_cc(rack_index, unit_index, port_index, bool(bottle.request.forms.get(param_name)), 0, 0)
                 port_index += 1
             unit_index += 1
         rack_index += 1

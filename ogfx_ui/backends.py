@@ -118,9 +118,18 @@ class backend:
         self.port_cc_bindings = {}
 
     def set_unit_midi_cc(self, rack_index, unit_index, enabled, channel, cc):
+        logging.debug('set_unit_midi_cc {} {} {} {} {}'.format(rack_index, unit_index, enabled, channel, cc))
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['enabled'] = enabled
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['channel'] = channel
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['cc'] = cc
+
+        self.setup_midi_maps()
+
+    def set_port_midi_cc(self, rack_index, unit_index, port_index, enabled, channel, cc):
+        logging.debug('set_port_midi_cc {} {} {} {} {} {}'.format(rack_index, unit_index, port_index, enabled, channel, cc))
+        self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['cc']['enabled'] = enabled
+        self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['cc']['channel'] = channel
+        self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['cc']['cc'] = cc
 
         self.setup_midi_maps()
 
