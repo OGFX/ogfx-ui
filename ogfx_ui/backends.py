@@ -119,19 +119,23 @@ class backend:
 
     def set_unit_midi_cc(self, rack_index, unit_index, enabled, channel, cc):
         logging.debug('set_unit_midi_cc {} {} {} {} {}'.format(rack_index, unit_index, enabled, channel, cc))
+
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['enabled'] = enabled
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['channel'] = channel
         self.setup['racks'][rack_index]['units'][unit_index]['cc']['cc'] = cc
 
-        self.setup_midi_maps()
+        # self.setup_midi_maps()
 
-    def set_port_midi_cc(self, rack_index, unit_index, port_index, enabled, channel, cc):
+    def set_port_midi_cc(self, rack_index, unit_index, port_index, enabled, channel, cc, minimum, maximum):
         logging.debug('set_port_midi_cc {} {} {} {} {} {}'.format(rack_index, unit_index, port_index, enabled, channel, cc))
+
         self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['cc']['enabled'] = enabled
         self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['cc']['channel'] = channel
         self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['cc']['cc'] = cc
+        self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['cc']['target_minimum'] = minimum
+        self.setup['racks'][rack_index]['units'][unit_index]['input_control_ports'][port_index]['cc']['target_maximum'] = maximum
 
-        self.setup_midi_maps()
+        # self.setup_midi_maps()
 
     def move_rack_down(self, rack_index):
         racks = self.setup['racks']
@@ -392,6 +396,13 @@ class mod_host(backend):
                 else:
                     self.mod_process.stdin.write('midi_unmap {} :bypass\n'.format(index, unit['cc']['channel'], unit['cc']['cc']).encode('utf-8'))
                     self.mod_process.stdin.flush()
+                for port in unit['input_control_ports']:
+                    if port['cc']['enabled']:
+                        self.mod_process.stdin.write('midi_map {} {} {} {} {} {}\n'.format(index, port['symbol'], port['cc']['channel'], port['cc']['cc'], port['cc']['target_minimum'], port['cc']['target_maximum']).encode('utf-8'))
+                        self.mod_process.stdin.flush()
+                    else:
+                        self.mod_process.stdin.write('midi_unmap {} {}\n'.format(index, port['symbol']).encode('utf-8'))
+                        self.mod_process.stdin.flush()
             
     def set_port_value(self, rack_index, unit_index, port_index, value):
         logging.debug("set port value {} {} {} {}".format(rack_index, unit_index, port_index, value))

@@ -16,10 +16,10 @@
             </div>
             <span class="port-cc-mapping" {{ !"style=\"display: none;\"" if not port['cc']['enabled'] else ''}}>
                 MIDI CC:
-                <input name="port-midi-cc-channel-{{rack_index}}-{{unit_index}}-{{port_index}}" class="midi-cc-channel" title="Midi channel ([0..15], -1 for disabled)" type="text" min="-1" max="15" value="-1">
-                <input name="port-midi-cc-cc-{{rack_index}}-{{unit_index}}-{{port_index}}" class="midi-cc-cc" title="Midi CC ([0..127], -1 for disabled)" type="text" min="-1" max="127" value="-1">
-                <input name="port-midi-cc-min-{{rack_index}}-{{unit_index}}-{{port_index}}" class="float" title="Minimum value" type="text" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][1]}}" step="0.01">
-                <input name="port-midi-cc-max-{{rack_index}}-{{unit_index}}-{{port_index}}" class="float" title="Maximum value" type="text" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['range'][2]}}" step="0.01">
+                <input name="port_midi_cc_channel_{{rack_index}}_{{unit_index}}_{{port_index}}" class="midi-cc-channel" title="Midi channel ([0..15])" type="text" min="0" max="15" value="{{port['cc']['channel']}}">
+                <input name="port_midi_cc_cc_{{rack_index}}_{{unit_index}}_{{port_index}}" class="midi-cc-cc" title="Midi CC ([0..127])" type="text" min="0" max="127" value="{{port['cc']['cc']}}">
+                <input name="port_midi_cc_min_{{rack_index}}_{{unit_index}}_{{port_index}}" class="float" title="Minimum value" type="text" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['cc']['target_minimum']}}" step="0.01">
+                <input name="port_midi_cc_max_{{rack_index}}_{{unit_index}}_{{port_index}}" class="float" title="Maximum value" type="text" min="{{port['range'][1]}}" max="{{port['range'][2]}}" value="{{port['cc']['target_maximum']}}" step="0.01">
             </span>
         </div>
     % port_index = port_index + 1

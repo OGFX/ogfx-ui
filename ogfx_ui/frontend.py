@@ -322,11 +322,17 @@ def index_post():
                 param_name = 'input_control_port_value_text_{}_{}_{}'.format(rack_index, unit_index, port_index)
                 logging.debug('port value for: {} {} {} - {}'.format(rack_index, unit_index, port_index, param_name ))
                 og.set_port_value(rack_index, unit_index, port_index, float(bottle.request.forms.get(param_name)))
-                param_name = 'input_control_port_cc_enabled_checkbox_{}_{}_{}'.format(rack_index, unit_index, port_index)
-                og.set_port_midi_cc(rack_index, unit_index, port_index, bool(bottle.request.forms.get(param_name)), 0, 0)
+
+                enabled_param_name = 'input_control_port_cc_enabled_checkbox_{}_{}_{}'.format(rack_index, unit_index, port_index)
+                channel_param_name = 'port_midi_cc_channel_{}_{}_{}'.format(rack_index, unit_index, port_index)
+                cc_param_name = 'port_midi_cc_cc_{}_{}_{}'.format(rack_index, unit_index, port_index)
+                minimum_param_name = 'port_midi_cc_min_{}_{}_{}'.format(rack_index, unit_index, port_index)
+                maximum_param_name = 'port_midi_cc_max_{}_{}_{}'.format(rack_index, unit_index, port_index)
+                og.set_port_midi_cc(rack_index, unit_index, port_index, bool(bottle.request.forms.get(enabled_param_name)), int(bottle.request.forms.get(channel_param_name)), int(bottle.request.forms.get(cc_param_name)), float(bottle.request.forms.get(minimum_param_name)), float(bottle.request.forms.get(maximum_param_name)))
                 port_index += 1
             unit_index += 1
         rack_index += 1
+    og.setup_midi_maps()
     bottle.redirect('/')
 
 @bottle.route('/')
@@ -359,4 +365,4 @@ def run(o):
     global og;
     og = o
     logging.info('starting bottle server...')
-    bottle.run(host='0.0.0.0', port='8080', debug=True)
+    bottle.run(host='0.0.0.0', port='8080', debug=False, quiet=True)
