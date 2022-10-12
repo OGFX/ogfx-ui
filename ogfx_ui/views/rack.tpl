@@ -4,7 +4,7 @@
             <input type="checkbox" {{'checked' if rack['enabled'] else ''}} name="rack-enabled-{{rack_index}}" title="Rack enable">
             <span>rack-{{rack_index}}</span>
         </summary>
-
+        <span>autoconnect: <input type="checkbox" {{'checked' if rack['autoconnect'] else ''}}></span>
         <div class="indent">
             <a title="move up" href="move_rack_up/{{rack_index}}">up</a>
             <a title="move down" href="move_rack_down/{{rack_index}}">dwn</a>

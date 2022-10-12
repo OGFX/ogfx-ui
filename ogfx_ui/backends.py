@@ -194,7 +194,7 @@ class backend:
     def connect_jack_ports(self, port1, port2):
         try:
             logging.debug('connecting {} -> {}'.format(port1, port2))
-            subprocess.check_call(['jack_connect', port1, port2])
+            subprocess.check_call(['ogfx_jack_batch_connect', '-c', '[[\"{}\", \"{}\"]]'.format(port1, port2)])
         except:
             logging.debug('failed to connect {} -> {}'.format(port1, port2))
             
@@ -247,7 +247,7 @@ class backend:
                 try:
                     # logging.debug('connections_manager connecting {} {}'.format(connection[0], connection[1]))
                     # jack_client.connect(connection[0], connection[1])
-                    subprocess.check_output(['jack_connect', connection[0], connection[1]], stderr=subprocess.STDOUT)
+                    subprocess.check_output(['ogfx_jack_batch_connect', '-c', '[[\"{}\", \"{}\"]]'.format(connection[0], connection[1])], stderr=subprocess.STDOUT)
                 except:
                     pass        
 
