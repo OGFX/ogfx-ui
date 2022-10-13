@@ -46,7 +46,7 @@ class backend:
             self.units_map[p['uri']] = {'name': p['name'], 'data': p }
 
     def add_rack(self, rack_index):
-        self.setup['racks'].insert(rack_index, {'enabled': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]]})
+        self.setup['racks'].insert(rack_index, {'enabled': True, 'autoconnect': True, 'units': [], 'cc': None, 'input_connections': [[],[]], 'output_connections': [[],[]]})
         self.rewire()
 
     def delete_rack(self, rack_index):
@@ -271,31 +271,34 @@ class backend:
 
         for rack_index in range(0, len(self.setup['racks'])):
             rack = self.setup['racks'][rack_index]
+
             logging.debug('rewiring rack...')
             units = rack['units']
-            logging.debug('internal and extra connections...')
+            logging.debug('unit extra connections...')
             for unit_index in range(0, len(units)):
                 unit = units[unit_index]
                 self.toggle_unit_active(rack_index, unit_index, unit['enabled'])
                 logging.debug('connections for unit {}'.format(unit['name']))
 
+                # Initial port values. FIXME: This might reset state modified by MIDI controllers
                 port_index = 0
                 for port in unit['input_control_ports']:
                     self.set_port_value(rack_index, unit_index, port_index, port['value'])
                     port_index += 1
+
                 # Extra connections
                 port_index = 0
-                for port in unit['input_connections']:
+                for port_connections in unit['input_connections']:
                     # logging.debug(port)
-                    for connection in port:
-                        c = [connection, '{}:{}'.format(self.unit_jack_client_name(unit), port['symbol'])]
+                    for connection in port_connections:
+                        c = [connection, '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][port_index]['symbol'])]
                         logging.debug(c)
                         self.connections.append(c)
                     port_index += 1
                     
                 port_index = 0
-                for port in unit['output_connections']:
-                    for connection in port:
+                for port_connections in unit['output_connections']:
+                    for connection in port_connections:
                         c = ['{}:{}'.format(self.unit_jack_client_name(unit), unit['output_audio_ports'][port_index]['symbol']), connection]
                         logging.debug(c)
                         self.connections.append(c)
@@ -308,12 +311,13 @@ class backend:
                 #     self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[1]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
 
             logging.debug('rack connections...')
-            input_is_mono = (not not rack['input_connections'][0]) != (not not rack['input_connections'][1])
-            output_is_mono = (not not rack['output_connections'][0]) != (not not rack['output_connections'][1])
+            # input_is_mono = (not not rack['input_connections'][0]) != (not not rack['input_connections'][1])
+            # output_is_mono = (not not rack['output_connections'][0]) != (not not rack['output_connections'][1])
 
             input_connections = []
             output_connections = []
             for channel in range(0,2):
+                # FIXME: Is this check necessary?
                 if len(rack['input_connections'][channel]):
                     input_connections.append(rack['input_connections'][channel])
                 if len(rack['output_connections'][channel]):
