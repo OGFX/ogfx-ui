@@ -274,11 +274,38 @@ class backend:
 
             logging.debug('rewiring rack...')
             units = rack['units']
-            logging.debug('unit extra connections...')
+
+            logging.debug('rack connections...')
+            # input_is_mono = (not not rack['input_connections'][0]) != (not not rack['input_connections'][1])
+            # output_is_mono = (not not rack['output_connections'][0]) != (not not rack['output_connections'][1])
+
+            input_connections = rack['input_connections']
+            output_connections = rack['output_connections']
+
+            if len(units) == 0:
+                for channel in range(0, 2):
+                    # Connect all input ports to all output ports
+                    for input_connection in input_connections[channel]:
+                      for output_connections in output_connections[channel]:
+                          self.connections.append((input_connection, output_connection))
+            else:
+                # Hookup input connections to first unit
+                unit = units[0]
+                for channel in range(0, min(2, len(unit['input_audio_ports']))):
+                    for connection in input_connections[channel]:
+                        self.connections.append((connection, '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][channel]['symbol'])))
+
+                # Hookup output connections to last unit
+                unit = units[-1]
+                for channel in range(0, min(2, len(unit['output_audio_ports']))):
+                    for connection in output_connections[channel]:
+                        self.connections.append(('{}:{}'.format(self.unit_jack_client_name(unit), unit['output_audio_ports'][channel]['symbol']), connection))
+
+            logging.debug('extra connections...')
             for unit_index in range(0, len(units)):
                 unit = units[unit_index]
+                logging.debug('initial values for unit {}'.format(unit['name']))
                 self.toggle_unit_active(rack_index, unit_index, unit['enabled'])
-                logging.debug('connections for unit {}'.format(unit['name']))
 
                 # Initial port values. FIXME: This might reset state modified by MIDI controllers
                 port_index = 0
@@ -287,6 +314,7 @@ class backend:
                     port_index += 1
 
                 # Extra connections
+                logging.debug('extra connections for unit {}'.format(unit['name']))
                 port_index = 0
                 for port_connections in unit['input_connections']:
                     # logging.debug(port)
@@ -304,70 +332,16 @@ class backend:
                         self.connections.append(c)
                     port_index += 1
                     
-                # Internal connections:
-                # if len(unit['input_audio_ports']) >= 1:
-                #     self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[0]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][0]['symbol']))) 
-                # if len(unit['input_audio_ports']) >= 2:
-                #     self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output2_ports[1]), '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][1]['symbol'])))
-
-            logging.debug('rack connections...')
-            # input_is_mono = (not not rack['input_connections'][0]) != (not not rack['input_connections'][1])
-            # output_is_mono = (not not rack['output_connections'][0]) != (not not rack['output_connections'][1])
-
-            input_connections = []
-            output_connections = []
-            for channel in range(0,2):
-                # FIXME: Is this check necessary?
-                if len(rack['input_connections'][channel]):
-                    input_connections.append(rack['input_connections'][channel])
-                if len(rack['output_connections'][channel]):
-                    output_connections.append(rack['output_connections'][channel])
-
-            if len(input_connections) and len(output_connections):
-                if len(units) == 0:
-                    logging.debug('empty rack')
-                    for channel in range(0,2):
-                        inputs = input_connections[channel % len(input_connections)]
-                        outputs = output_connections[channel % len(output_connections)]
-                        for inp in inputs:
-                            for outp in outputs:
-                                self.connections.append((inp, outp))
-                else:
-                    logging.debug('non empty rack')
-                    logging.debug('input')
-                    unit = units[0]
-                    for channel in range(0,2):
-                        inputs = input_connections[channel % len(input_connections)]
-                        for inp in inputs:
-                            self.connections.append((inp, '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][channel % len(unit['input_audio_ports'])]['symbol'])))
-                    
-                    logging.debug('output')
-                    unit = units[-1]
-                    for channel in range(0,2):
-                        outputs = output_connections[channel % len(output_connections)]
-                        for outp in outputs:
-                            self.connections.append(('{}:{}'.format(self.switch_unit_jack_client_name(unit), self.switch_output1_ports[channel % len(unit['output_audio_ports'])]), outp))
-                            self.connections.append(('{}:{}'.format(self.unit_jack_client_name(unit), unit['output_audio_ports'][channel % len(unit['output_audio_ports'])]['symbol']), outp))
-
             logging.debug('linear connections...')
             for unit_index in range(1, len(units)):
                 logging.debug('unit index {}'.format(unit_index))
                 unit = units[unit_index]
                 prev_unit = units[unit_index - 1]
 
-                current_ports = len(unit['input_audio_ports'])
-                previous_ports = len(prev_unit['output_audio_ports'])
-                
-                maximum_ports = max(current_ports, previous_ports)
-                maximum_ports = min(2, maximum_ports)
-                logging.debug('maximum of number of ports of current and previous unit: {}'.format(maximum_ports))
-
-                for port_index in range(0, maximum_ports):
-                    current_port = port_index % current_ports
-                    previous_port = port_index % previous_ports
+                for port_index in range(0, min(2, min(len(unit['input_audio_ports']), len(prev_unit['output_audio_ports'])))):
                     self.connections.append((
-                        '{}:{}'.format(self.unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][previous_port]['symbol']),
-                        '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][current_port]['symbol']))) 
+                        '{}:{}'.format(self.unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][port_index]['symbol']),
+                        '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][port_index]['symbol']))) 
                        
         self.rewire_update_connections(old_connections, self.connections)
         self.setup_midi_maps()
