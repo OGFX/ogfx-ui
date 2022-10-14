@@ -267,7 +267,6 @@ class backend:
 
         for connection in self.setup['input_midi_connections']:
             self.lazy_connections.append((self.midi_input_port, connection))
-            # self.lazy_connections.append(('ogfx_jack_midi_tool:in0', connection))
 
         for rack_index in range(0, len(self.setup['racks'])):
             rack = self.setup['racks'][rack_index]
@@ -275,33 +274,7 @@ class backend:
             logging.debug('rewiring rack...')
             units = rack['units']
 
-            logging.debug('rack connections...')
-            # input_is_mono = (not not rack['input_connections'][0]) != (not not rack['input_connections'][1])
-            # output_is_mono = (not not rack['output_connections'][0]) != (not not rack['output_connections'][1])
-
-            input_connections = rack['input_connections']
-            output_connections = rack['output_connections']
-
-            if len(units) == 0:
-                for channel in range(0, 2):
-                    # Connect all input ports to all output ports
-                    for input_connection in input_connections[channel]:
-                      for output_connections in output_connections[channel]:
-                          self.connections.append((input_connection, output_connection))
-            else:
-                # Hookup input connections to first unit
-                unit = units[0]
-                for channel in range(0, min(2, len(unit['input_audio_ports']))):
-                    for connection in input_connections[channel]:
-                        self.connections.append((connection, '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][channel]['symbol'])))
-
-                # Hookup output connections to last unit
-                unit = units[-1]
-                for channel in range(0, min(2, len(unit['output_audio_ports']))):
-                    for connection in output_connections[channel]:
-                        self.connections.append(('{}:{}'.format(self.unit_jack_client_name(unit), unit['output_audio_ports'][channel]['symbol']), connection))
-
-            logging.debug('extra connections...')
+            logging.debug('manual connections...')
             for unit_index in range(0, len(units)):
                 unit = units[unit_index]
                 logging.debug('initial values for unit {}'.format(unit['name']))
@@ -331,18 +304,52 @@ class backend:
                         logging.debug(c)
                         self.connections.append(c)
                     port_index += 1
-                    
-            logging.debug('linear connections...')
-            for unit_index in range(1, len(units)):
-                logging.debug('unit index {}'.format(unit_index))
-                unit = units[unit_index]
-                prev_unit = units[unit_index - 1]
 
-                for port_index in range(0, min(2, min(len(unit['input_audio_ports']), len(prev_unit['output_audio_ports'])))):
-                    self.connections.append((
-                        '{}:{}'.format(self.unit_jack_client_name(prev_unit), prev_unit['output_audio_ports'][port_index]['symbol']),
-                        '{}:{}'.format(self.unit_jack_client_name(unit), unit['input_audio_ports'][port_index]['symbol']))) 
-                       
+            # Short circuit and go on to next rack
+            if not rack['autoconnect']:
+                logging.debug('autoconnect disabled. continuing...')
+                continue
+
+
+            # Let's represent all ports as a list of pairs where
+            # the first entry are the input ports and the second
+            # entry are the output ports.
+            ports = []
+            
+            # The rack inputs are just output ports
+            ports.append(([], rack['input_connections']))
+
+            # The unit ports are a flat list so let's lift them to
+            # a list of lists and make pairs out of those..
+            for unit in rack['units']:
+                ports.append(
+                    (
+                        list(map(lambda x: ['{}:{}'.format(self.unit_jack_client_name(unit), x['symbol'])], unit['input_audio_ports'])), 
+                        list(map(lambda x: ['{}:{}'.format(self.unit_jack_client_name(unit), x['symbol'])], unit['output_audio_ports']))
+                    )
+                )
+                logging.debug('ports: {}'.format(tuple(map(lambda x: list(x), ports[-1]))))
+
+            # The rack outputs are just input ports
+            ports.append((rack['output_connections'], []))
+            logging.debug(ports)
+
+            # Now connect them in a unified fashion..
+            for index in range(1, len(ports)):
+                prev_entry = ports[index-1]
+                curr_entry = ports[index]
+
+                # We never collapse (i.e. connect two output ports to
+                # a single input port), but we do fan out (i.e. connect
+                # a single output port to two input ports.)
+                for channel in range(0,min(2, len(curr_entry[0]))):
+                    output_ports = prev_entry[1][channel % len(prev_entry[1])]
+                    input_ports = curr_entry[0][channel]
+                    for output_port in output_ports:
+                        for input_port in input_ports:
+                            logging.debug('connection {} -> {}'.format(input_port, output_port))
+                            self.connections.append((output_port, input_port))
+
         self.rewire_update_connections(old_connections, self.connections)
         self.setup_midi_maps()
 
@@ -354,9 +361,6 @@ class mod_host(backend):
         self.mod_units = []
         self.mod_start_index = 8000
         self.mod_process = subprocess.Popen(["mod-host", "-i"], stdin=subprocess.PIPE, preexec_fn=ignore_sigint)
-        self.switch_input_ports = [ "InL", "InR" ]
-        self.switch_output1_ports = [ "OUT1L", "OUT1R" ]
-        self.switch_output2_ports = [ "Out2L", "Out2R" ]
         backend.__init__(self, lv2_world)
 
     def __del__(self):
@@ -432,24 +436,4 @@ class mod_host(backend):
 
     def unit_jack_client_name(self, unit):
         return '{}-{}'.format(unit['uuid'][0:8], unit['uri'][-54:])
-
-    def switch_unit_jack_client_name(self, unit):
-        return '{}-{}-{}'.format(unit['uuid'][0:8], 'switch', unit['uri'][-47:])
-
-    # def unit_jack_client_name(self, unit):
-    #     return '{}-{}'.format(unit['uuid'][0:8], unit['uri'])
-
-    # def switch_unit_jack_client_name(self, unit):
-    #     return '{}-{}-{}'.format(unit['uuid'][0:8], 'switch', unit['uri'])
-
-
-    # def unit_jack_client_name(self, unit):
-    #     index = self.mod_units.index(unit['uuid'])     
-    #     return 'effect_{}'.format(2*index)
-
-    # def switch_unit_jack_client_name(self, unit):
-    #     index = self.mod_units.index(unit['uuid'])    
-    #     return 'effect_{}'.format(2*index+1)
-    #    
-
 
