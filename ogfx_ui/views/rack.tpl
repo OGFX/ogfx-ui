@@ -37,12 +37,12 @@
         % unit_index = 0
         % for unit in rack['units']:
             % include('unit.tpl', unit=unit)
-        % unit_index = unit_index + 1
-        <div class="add-unit rounded-shadow-box">
-            <a href="add/{{rack_index}}/{{unit_index}}">add unit...</a>
-            <a title="load" href="load/{{rack_index}}">ld..</a>
-            <a title="upload" href="upload/{{rack_index}}">ul..</a>
-        </div>
+            % unit_index = unit_index + 1
+            <div class="add-unit rounded-shadow-box">
+                <a href="add/{{rack_index}}/{{unit_index}}">add unit...</a>
+                <a title="load" href="load/{{rack_index}}">ld..</a>
+                <a title="upload" href="upload/{{rack_index}}">ul..</a>
+            </div>
         % end
         <div class="connections-info">
             % channel_index = 0
