@@ -31,8 +31,6 @@
         </div>
         <div class="add-unit rounded-shadow-box">
             <a href="add/{{rack_index}}/0">add unit...</a>
-            <a title="load" href="load/{{rack_index}}">ld..</a>
-            <a title="upload" href="upload/{{rack_index}}">ul..</a>
         </div>
         % unit_index = 0
         % for unit in rack['units']:
@@ -40,8 +38,6 @@
             % unit_index = unit_index + 1
             <div class="add-unit rounded-shadow-box">
                 <a href="add/{{rack_index}}/{{unit_index}}">add unit...</a>
-                <a title="load" href="load/{{rack_index}}">ld..</a>
-                <a title="upload" href="upload/{{rack_index}}">ul..</a>
             </div>
         % end
         <div class="connections-info">
