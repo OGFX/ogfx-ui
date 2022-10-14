@@ -23,7 +23,7 @@ import traceback
 setups_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'setups')
 racks_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'racks')
 units_path = os.path.join(XDG_DATA_HOME, 'ogfx', 'units')
-default_setup_file_path = os.path.join(setups_path, 'default.ogfx-setup')
+default_setup_file_path = os.path.join(setups_path, 'default')
 
 og = None
 
