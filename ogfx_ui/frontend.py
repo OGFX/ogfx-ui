@@ -13,6 +13,7 @@ import copy
 import io
 import logging
 import urllib
+import uuid
 
 import time
 import subprocess
@@ -257,51 +258,102 @@ def save_default_setup():
     with open(default_setup_file_path, 'w') as f:
         f.write(json.dumps(og.setup, indent=4))
 
+@bottle.route('/saveas2/<rack_index:int>/<unit_index:int>')
+def saveas2(rack_index, unit_index):
+    path = bottle.request.query.get('filename')
+    logging.debug('saveas2: path: {}'.format(path))
+    with open(pathlib.Path(units_path, path), 'w') as file:
+        json.dump(og.setup['racks'][rack_index]['units'][unit_index], file, indent=4)
+
+    bottle.redirect('/')
+
+@bottle.route('/saveas2/<rack_index:int>')
+def saveas2(rack_index):
+    path = bottle.request.query.get('filename')
+    logging.debug('saveas2: path: {}'.format(path))
+    with open(pathlib.Path(racks_path, path), 'w') as file:
+        json.dump(og.setup['racks'][rack_index], file, indent=4)
+
+    bottle.redirect('/')
+
+@bottle.route('/saveas2')
+def saveas2():
+    path = bottle.request.query.get('filename')
+    logging.debug('saveas2: path: {}'.format(path))
+    with open(pathlib.Path(setups_path, path), 'w') as file:
+        json.dump(og.setup, file, indent=4)
+
+    bottle.redirect('/')
+
+@bottle.route('/saveas')
+@bottle.view('file_chooser')
+def load_setup():
+    return {'save': True, 'files': list(map(lambda x: x.name, pathlib.Path(setups_path).iterdir())), 'remaining_path': ''}
+
+@bottle.route('/saveas/<rack_index:int>')
+@bottle.view('file_chooser')
+def load_setup(rack_index):
+    return {'save':  True, 'files': list(map(lambda x: x.name, pathlib.Path(racks_path).iterdir())), 'remaining_path': '/{}'.format(rack_index)}
+
+@bottle.route('/saveas/<rack_index:int>/<unit_index:int>')
+@bottle.view('file_chooser')
+def load_setup(rack_index, unit_index):
+    return {'save': True, 'files': list(map(lambda x: x.name, pathlib.Path(units_path).iterdir())), 'remaining_path': '/{}/{}'.format(rack_index, unit_index)}
+
 
 # LOADING FILES
 
 
-@bottle.route('/load2/<rack_index:int>/<unit_index:int>/<path:path>')
-def load2(rack_index, unit_index, path):
+@bottle.route('/load2/<rack_index:int>/<unit_index:int>')
+def load2(rack_index, unit_index):
+    path = bottle.request.query.get('filename')
     logging.debug('load2: path: {}'.format(path))
-    with open(path, 'r') as file:
+    with open(pathlib.Path(units_path, path), 'r') as file:
         data = json.loads(file.read())
+        data['uuid'] = str(uuid.uuid4())
         og.setup['racks'][rack_index]['units'][unit_index] = data
+        og.rewire()
 
     bottle.redirect('/')
 
-@bottle.route('/load2/<rack_index:int>/<path:path>')
-def load2(rack_index, path):
+@bottle.route('/load2/<rack_index:int>')
+def load2(rack_index):
+    path = bottle.request.query.get('filename')
     logging.debug('load2: path: {}'.format(path))
-    with open(path, 'r') as file:
+    with open(pathlib.Path(racks_path, path), 'r') as file:
         data = json.loads(file.read())
+        for unit in data['units']:
+            unit['uuid'] = str(uuid.uuid4())
         og.setup['racks'][rack_index] = data
+        og.rewire()
 
     bottle.redirect('/')
 
-@bottle.route('/load2/<path:path>')
-def load2(path):
+@bottle.route('/load2')
+def load2():
+    path = bottle.request.query.get('filename')
     logging.debug('load2: path: {}'.format(path))
-    with open(path, 'r') as file:
+    with open(pathlib.Path(setups_path, path), 'r') as file:
         data = json.loads(file.read())
         og.setup = data
+        og.rewire()
 
     bottle.redirect('/')
 
 @bottle.route('/load')
 @bottle.view('file_chooser')
 def load_setup():
-    return {'files': list(map(str, pathlib.Path(setups_path).iterdir())), 'remaining_path': ''}
+    return {'save': False, 'files': list(map(lambda x: x.name, pathlib.Path(setups_path).iterdir())), 'remaining_path': ''}
 
 @bottle.route('/load/<rack_index:int>')
 @bottle.view('file_chooser')
 def load_setup(rack_index):
-    return {'files': list(map(str, pathlib.Path(racks_path).iterdir())), 'remaining_path': '/{}'.format(rack_index)}
+    return {'save':  False, 'files': list(map(lambda x: x.name, pathlib.Path(racks_path).iterdir())), 'remaining_path': '/{}'.format(rack_index)}
 
 @bottle.route('/load/<rack_index:int>/<unit_index:int>')
 @bottle.view('file_chooser')
 def load_setup(rack_index, unit_index):
-    return {'files': list(map(str, pathlib.Path(units_path).iterdir())), 'remaining_path': '/{}/{}'.format(rack_index, unit_index)}
+    return {'save': False, 'files': list(map(lambda x: x.name, pathlib.Path(units_path).iterdir())), 'remaining_path': '/{}/{}'.format(rack_index, unit_index)}
 
 # FORM SUBMISSION
 
