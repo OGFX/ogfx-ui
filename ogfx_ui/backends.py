@@ -215,15 +215,14 @@ class backend:
         for connection in old_connections:
             if not connection in new_connections:
                 connections_to_be_removed.append(connection)
-                # self.disconnect_jack_ports(connection[0], connection[1])
 
         subprocess.check_call(['ogfx_jack_batch_connect', '-d', '1', '-c', json.dumps(connections_to_be_removed)])
 
+        # Then add the new connections
         connections_to_be_made = []
         for connection in new_connections:
             if not connection in old_connections:
                 connections_to_be_made.append(connection)
-                # self.connect_jack_ports(connection[0], connection[1])
 
         subprocess.check_call(['ogfx_jack_batch_connect', '-d', '0', '-c', json.dumps(connections_to_be_made)])
  
@@ -427,7 +426,7 @@ class mod_host(backend):
         if len(self.setup['racks']) and len(self.setup['racks'][0]['units']):
             delta_t = 0.1
             t = 0
-            while (not self.rewire_port_with_prefix_exists(self.unit_jack_client_name(self.setup['racks'][0]['units'][-2]))) and delta_t < 1:
+            while (not self.rewire_port_with_prefix_exists(self.unit_jack_client_name(self.setup['racks'][0]['units'][-2]))) and (delta_t < 1):
                 time.sleep(delta_t)
                 t = t + delta_t
                 
