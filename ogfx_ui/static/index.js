@@ -103,12 +103,13 @@ document.addEventListener("readystatechange", event => {
 
                 if (range.mouseDownEvent) {
                     var diff = (e.clientX - range.mouseDownEvent.clientX) / range.clientWidth;
+                    /*
                     if (Math.abs(diff) < threshold) {
                         diff = factor * diff;
                     } else {
                         diff = diff - Math.sign(diff) * (threshold - factor * threshold);
                     }
-
+                    */
                     range.value = "" + (range.mouseDownValue + (parseFloat(range.max) - parseFloat(range.min)) * diff);
                     sliderChanged.call(range);
                 }

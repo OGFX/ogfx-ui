@@ -426,7 +426,7 @@ class mod_host(backend):
         if len(self.setup['racks']) and len(self.setup['racks'][0]['units']):
             delta_t = 0.1
             t = 0
-            while (not self.rewire_port_with_prefix_exists(self.unit_jack_client_name(self.setup['racks'][0]['units'][-2]))) and (delta_t < 1):
+            while (not self.rewire_port_with_prefix_exists(self.unit_jack_client_name(self.setup['racks'][0]['units'][-1]))) and (delta_t < 1):
                 time.sleep(delta_t)
                 t = t + delta_t
                 
