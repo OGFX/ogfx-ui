@@ -360,6 +360,8 @@ class mod_host(backend):
         self.mod_units = []
         self.mod_start_index = 8000
         self.mod_process = subprocess.Popen(["mod-host", "-i"], stdin=subprocess.PIPE, preexec_fn=ignore_sigint)
+        self.mod_process.stdin.write('transport 1 4 120\n'.encode('utf-8'))
+        self.mod_process.stdin.flush()
         backend.__init__(self, lv2_world)
 
     def __del__(self):
@@ -418,10 +420,14 @@ class mod_host(backend):
             for unit in rack['units']:
                 if not unit['uuid'] in self.mod_units:
                     logging.debug("adding plugin: {}".format(unit['uri']))
-                    self.mod_process.stdin.write("add {} {} {}\n".format(unit['uri'], 2*len(self.mod_units), self.unit_jack_client_name(unit)).encode('utf-8')) 
-                    # self.mod_process.stdin.write("add http://moddevices.com/plugins/mod-devel/switchbox_1-2_st {} {}\n".format(2*len(self.mod_units)+1, self.switch_unit_jack_client_name(unit)).encode('utf-8')) 
+                    index = 2*len(self.mod_units)
+                    self.mod_process.stdin.write("add {} {} {}\n".format(unit['uri'], index, self.unit_jack_client_name(unit)).encode('utf-8')) 
                     self.mod_process.stdin.flush()
                     self.mod_units.append(unit['uuid'])
+                    if 'duplicate' in unit:
+                        if unit['duplicate']:
+                            self.mod_process.stdin.write("add {} {} {}\n".format(unit['uri'], index + 1, self.unit_jack_client_name(unit)).encode('utf-8')) 
+                            self.mod_process.stdin.flush()
 
         if len(self.setup['racks']) and len(self.setup['racks'][0]['units']):
             delta_t = 0.1
