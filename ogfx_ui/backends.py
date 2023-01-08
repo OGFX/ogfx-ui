@@ -24,7 +24,7 @@ class backend:
 
     def create_setup(self):
         logging.info("creating (empty default) setup...")
-        self.setup = {'racks': [], 'schema-version': 1, 'input_midi_connections': []}
+        self.setup = {'racks': [], 'schema-version': 1, 'input_midi_connections': [], 'tempotap': { 'enabled': False, 'channel': 0, 'cc': 0 } }
         self.rewire()
 
     def create_units_map(self):
@@ -116,6 +116,11 @@ class backend:
             rack_index += 1
 
         self.port_cc_bindings = {}
+
+    def set_tempotap_midi_cc(self, enabled, channel, cc):
+        self.setup['tempotap']['enabled'] = enabled
+        self.setup['tempotap']['cc'] = cc
+        self.setup['tempotap']['channel'] = channel
 
     def set_unit_midi_cc(self, rack_index, unit_index, enabled, channel, cc):
         logging.debug('set_unit_midi_cc {} {} {} {} {}'.format(rack_index, unit_index, enabled, channel, cc))
@@ -370,6 +375,12 @@ class mod_host(backend):
         self.mod_process.wait()
     
     def setup_midi_maps(self):
+        if self.setup['tempotap']['enabled']:
+            self.mod_process.stdin.write('midi_map_tempo_tap {} {}\n'.format(self.setup['tempotap']['channel'], self.setup['tempotap']['cc']).encode('utf-8'))
+        else:
+            self.mod_process.stdin.write('midi_unmap_tempo_tap\n'.encode('utf-8'))
+        self.mod_process.stdin.flush()
+
         for rack in self.setup['racks']:
             for unit in rack['units']:
                 index = 2 * self.mod_units.index(unit['uuid'])

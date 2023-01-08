@@ -30,6 +30,13 @@
             <div><a class="indent" href="connect/midi-input">connect..</a></div>
         </div>
 
+        <div class="connections-info rounded-shadow-box">
+            tempo tap MIDI CC:
+            <input id="tempotap-midi-cc-enabled" class="tempotap-midi-cc-enabled" name="tempotap_midi_cc_enabled" title="Midi CC enabled" type="checkbox" {{'checked' if setup['tempotap']['enabled'] else ''}}>
+            <input id="tempotap-midi-cc-channel" class="tempotap-midi-cc-channel midi-cc-channel" name="tempotap_midi_cc_channel" title="Midi channel (0..15)" type="number" min="0" max="15" value="{{setup['tempotap']['channel']}}">
+            <input id="tempotap-midi-cc-cc" class="tempotap-midi-cc-cc midi-cc-cc" name="tempotap_midi_cc_cc" title="Midi CC (0..127)" type="number" min="0" max="127" value="{{setup['tempotap']['cc']}}">
+        </div>
+
         <div class="racks-navigation-list rounded-shadow-box">
             <span>racks:</span>
             <div class="operations indent">
