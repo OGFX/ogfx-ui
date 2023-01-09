@@ -251,7 +251,8 @@ class backend:
                 try:
                     # logging.debug('connections_manager connecting {} {}'.format(connection[0], connection[1]))
                     # jack_client.connect(connection[0], connection[1])
-                    subprocess.check_output(['ogfx_jack_batch_connect', '-c', '[[\"{}\", \"{}\"]]'.format(connection[0], connection[1])], stderr=subprocess.STDOUT)
+                    result = subprocess.check_output(['ogfx_jack_batch_connect', '-c', '[[\"{}\", \"{}\"]]'.format(connection[0], connection[1])], stderr=subprocess.STDOUT)
+                    print(result)
                 except:
                     pass        
 
@@ -270,7 +271,7 @@ class backend:
         self.lazy_connections = []
 
         for connection in self.setup['input_midi_connections']:
-            self.lazy_connections.append((self.midi_input_port, connection))
+            self.lazy_connections.append((connection, self.midi_input_port))
 
         for rack_index in range(0, len(self.setup['racks'])):
             rack = self.setup['racks'][rack_index]
