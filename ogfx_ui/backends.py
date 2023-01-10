@@ -252,7 +252,7 @@ class backend:
                     # logging.debug('connections_manager connecting {} {}'.format(connection[0], connection[1]))
                     # jack_client.connect(connection[0], connection[1])
                     result = subprocess.check_output(['ogfx_jack_batch_connect', '-c', '[[\"{}\", \"{}\"]]'.format(connection[0], connection[1])], stderr=subprocess.STDOUT)
-                    print(result)
+                    # print(result)
                 except:
                     pass        
 

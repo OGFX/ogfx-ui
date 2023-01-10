@@ -37,17 +37,6 @@
             <input id="tempotap-midi-cc-cc" class="tempotap-midi-cc-cc midi-cc-cc" name="tempotap_midi_cc_cc" title="Midi CC (0..127)" type="number" min="0" max="127" value="{{setup['tempotap']['cc']}}">
         </div>
 
-        <div class="racks-navigation-list rounded-shadow-box">
-            <span>racks:</span>
-            <div class="operations indent">
-                % index = 0
-                % for rack in setup['racks']:
-                    <a href="#rack-{{index}}">rack-{{index}}</a>
-                    % index = index + 1
-                %end
-            </div>
-        </div>
-
         <form action="/" method="post">
             <div class="add-rack rounded-shadow-box">
             <a href="add/0">add rack</a>
