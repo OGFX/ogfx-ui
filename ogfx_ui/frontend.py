@@ -359,6 +359,7 @@ def load_setup(rack_index, unit_index):
 
 @bottle.route('/', method='POST')
 def index_post():
+    og.set_tempotap_midi_cc(bool(bottle.request.forms.get('tempotap_midi_cc_enabled')), int(bottle.request.forms.get('tempotap_midi_cc_channel')), int(bottle.request.forms.get('tempotap_midi_cc_cc')))
     rack_index = 0
     for rack in og.setup['racks']:
         param_name = 'rack_enabled_{}'.format(rack_index)
