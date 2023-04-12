@@ -5,6 +5,7 @@ import argparse
 import os
 import subprocess
 import json
+import uuid
 
 arguments_parser = argparse.ArgumentParser(description='ogfx_ui - a web interface for OGFX')
 arguments_parser.add_argument('--log-level', type=int, dest='log_level', help='5: DEBUG, 4: INFO, 3: WARNING, 2: ERROR, 1: CRITICAL, default: %(default)s', action='store', default=4)
@@ -45,6 +46,12 @@ og = ogfx_ui.backends.mod_host(lv2_world)
 og.start_threads()
 logging.info('done.')
 
+def fixup_setup(setup):
+    for rack in og.setup['racks']:
+        for unit in rack['units']:
+            unit['uuid'] = str(uuid.uuid4())
+
+
 try:
     if arguments.setup:
         logging.info('loading setup {}...'.format(arguments.setup))
@@ -52,6 +59,7 @@ try:
             json_content = f.read()
             setup = json.loads(json_content)
             og.setup = setup
+            fixup_setup(og.setup)
             og.setup_filename = arguments.setup
             og.rewire()
     else:
@@ -60,6 +68,7 @@ try:
                 setup_json_string = f.read()
                 setup = json.loads(setup_json_string)
                 og.setup = setup
+                fixup_setup(og.setup)
                 og.setup_filename = ogfx_ui.default_setup_file_path
                 og.rewire()
                 
